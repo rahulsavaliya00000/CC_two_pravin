@@ -112,15 +112,21 @@ class _MyAppState extends State<MyApp> {
       return true;
     }
 
-    // 2. Count back presses and show exit dialog on the 3rd press
+    // 2. If there are sub-screens or a dialog open, let Flutter handle pop normally
+    bool canPop = navigatorKey.currentState?.canPop() ?? false;
+    if (canPop) {
+      return false; // Back button will close the dialog or navigate back to the previous screen
+    }
+
+    // 3. We are on the root screen (HomeScreen/OnboardingScreen) and no dialog is open.
+    // Intercept back gesture, count presses, and show the exit dialog on the 3rd press.
     _backPressCount++;
     if (_backPressCount >= 3) {
       _backPressCount = 0;
       _showExitDialog();
     }
 
-    // 3. Always return true to block the default back event/pop/exit behavior completely
-    return true;
+    return true; // Return true to block the default back button/gesture pop behavior
   }
 
   @override
