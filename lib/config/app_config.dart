@@ -98,6 +98,89 @@ class AppStrings {
     "Launching studio environment...",
   ];
 
+  // Daily Rewards
+  static const String dailyRewardTitle = "CLAIM DAILY REWARDS";
+  static const String dailyRewardSubtitle = "Claim consecutive daily rewards to unlock premium AI video rendering power.";
+  static const String claimRewards = "Claim Rewards";
+  static const String claimed = "Claimed!";
+  static const List<String> rewardDays = ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5", "Day 6", "Day 7"];
+  static const List<String> rewardCoins = ["50 Coins", "100 Coins", "150 Coins", "200 Coins", "300 Coins", "500 Coins", "PRO 24H"];
+
+  // AI Project Wizard
+  static const String wizardTitle = "AI Project Wizard";
+  static const String selectAspectPlatform = "Select Aspect Ratio & Target Platform:";
+  static const String selectStylePreset = "Select Visual Style Preset:";
+  static const String selectAudioMood = "Select Audio & Beat Sync Mood:";
+  static const String confirmProjectSetup = "Confirm Project Setup:";
+  static const String previous = "Previous";
+  static const String nextStep = "Next Step";
+  static const String generateAiProject = "Generate AI Project";
+  static const String targetPlatform = "Target Platform";
+  static const String visualStyle = "Visual Style";
+  static const String audioMood = "Audio Mood";
+
+  // Studio Tab
+  static const String studioTab = "Studio";
+  static const String newProjectTitle = "NEW PROJECT";
+  static const String newProjectSubtitle = "Start from scratch with blank canvas";
+  static const String quickAiTools = "Quick AI Creation Tools";
+  static const String featuredVideoEffects = "Featured AI Video Effects";
+  static const String trendingPresets = "Trending Presets & Templates";
+
+  // AI Creation Tools
+  static const String autoVelocityRamping = "Auto Velocity Ramping";
+  static const String backgroundRemover = "Background Remover";
+  static const String aiColorGrading = "AI Color Grading";
+  static const String autoCaptionGenerator = "Auto Caption Generator";
+  static const String multiTrackTimeline = "Multi-Track Timeline";
+  static const String proExport4k = "Pro Export 4K";
+
+  // Templates Tab
+  static const String templatesTab = "Templates";
+  static const String searchTemplates = "Search 1000+ Beat-Synced Templates...";
+  static const String useTemplate = "Use Template";
+  static const List<String> templateCategories = [
+    "All", "3D Velocity", "Slow Mo", "Cyberpunk", "Retro VHS", "Anime AI", "Glitch Beat"
+  ];
+
+  // Tutorials Tab
+  static const String tutorialsTab = "Tutorials";
+  static const String aiEditingMasterclass = "AI Editing Masterclass";
+  static const String learnSecretTechniques = "Learn secret techniques from top video creators to boost your edit workflow.";
+  static const String watchTutorial = "Watch Tutorial";
+  static const List<String> tutorialCategories = ["All", "Beginner", "Intermediate", "Advanced"];
+
+  // Profile Tab & Settings
+  static const String profileTab = "Profile";
+  static const String creatorStudioPro = "Creator Studio Pro";
+  static const String proMember = "PRO MEMBER";
+  static const String projectsCreated = "Projects Created";
+  static const String assetsDownloaded = "Assets Downloaded";
+  static const String aiCredits = "AI Credits";
+
+  static const String generalSettings = "General Settings";
+  static const String exportQualitySettings = "Export Quality Settings";
+  static const String hardwareAcceleration = "Hardware Acceleration";
+  static const String cloudSync = "Cloud Sync & Backup";
+  static const String clearCache = "Clear Cache";
+
+  static const String legalAndSupport = "Legal & Support";
+  static const String reportABug = "Report a Bug";
+  static const String privacyPolicy = "Privacy Policy";
+  static const String termsAndConditions = "Terms & Conditions";
+  static const String openSourceLicenses = "Open Source Licenses";
+  static const String appVersion = "Version 4.2.2 (Build 803)";
+
+  // Timeline Toolbar Icons & Actions
+  static const String split = "Split";
+  static const String speed = "Speed";
+  static const String volume = "Volume";
+  static const String animation = "Animation";
+  static const String delete = "Delete";
+  static const String adjust = "Adjust";
+  static const String filters = "Filters";
+  static const String sampleTimecode = "00:00:12 / 00:03:45";
+
   // Export Screen
   static const String exportTitle = "Export Settings";
   static const String exportButton = "Export Video";
@@ -108,12 +191,32 @@ class AppStrings {
   static const String ok = "OK";
   static const String tryAgainLater = "Try Again Later";
 
+  static const String resolutionLabel = "Resolution";
+  static const String frameRateLabel = "Frame Rate";
+  static const String bitrateLabel = "Target Bitrate (Mbps)";
+  static const String codecLabel = "Video Codec";
+  static const String colorSpaceLabel = "Color Space";
+  static const String audioSampleRateLabel = "Audio Sample Rate";
+
+  static const String hdrEncoding = "HDR Video Encoding";
+  static const String hardwareEncoding = "Hardware Accelerated Export";
+  static const String exportAudioOnly = "Export Audio Only (.MP3)";
+  static const String addWatermark = "Include CC Watermark";
+  static const String analyzeTimeline = "Analyze Timeline";
+  static const String analyzing = "Analyzing...";
+
+  static const List<String> resolutionOptions = ["720p (HD)", "1080p (Full HD)", "2K (QHD)", "4K (Ultra HD)"];
+  static const List<String> frameRateOptions = ["24 fps (Cinematic)", "30 fps (Standard)", "60 fps (Ultra Smooth)"];
+  static const List<String> codecOptions = ['H.264 (High Profile)', 'H.265 (HEVC)', 'AV1 (Experimental)'];
+  static const List<String> colorSpaceOptions = ['Rec. 709 (SDR)', 'Rec. 2020 (HDR10)', 'DCI-P3 (Cinema)'];
+  static const List<String> sampleRateOptions = ['44.1 kHz', '48 kHz', '96 kHz (Hi-Res)'];
+
   // Guide & Tool Processing
   static const String toolProcessingFailed = "Tool Processing Failed";
   static const String serviceUnavailable = "Service Temporarily Unavailable";
   static const String serverLimitReached = "Server processing limit reached (Error Code 503). Something went wrong while applying engine assets. Please try again later in 10 minutes.";
 
-  // Legal & Privacy Policy
+  // Legal & Privacy Policy Texts
   static const String privacyPolicyText = """
 Last updated: August 2026
 
