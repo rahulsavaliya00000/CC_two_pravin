@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../config/app_config.dart';
+
 import 'dart:math';
 import '../link_handler.dart';
 import 'guide_screen.dart';
@@ -63,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               title: Row(
                 children: [
-                  const Icon(Icons.auto_awesome, color: Color(0xFF00E5FF), size: 20),
+                  const Icon(Icons.auto_awesome, color: AppColors.primaryCyan, size: 20),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -82,14 +84,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF00E5FF).withOpacity(0.15),
+                      color: AppColors.primaryCyan.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: const Color(0xFF00E5FF).withOpacity(0.4)),
+                      border: Border.all(color: AppColors.primaryCyan.withOpacity(0.4)),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("Queue Position: #$queuePos", style: const TextStyle(color: Color(0xFF00E5FF), fontWeight: FontWeight.bold, fontSize: 13)),
+                        Text("Queue Position: #$queuePos", style: const TextStyle(color: AppColors.primaryCyan, fontWeight: FontWeight.bold, fontSize: 13)),
                         Text("${((280 - tick) / 10).ceil()}s left", style: const TextStyle(color: Colors.white70, fontSize: 11)),
                       ],
                     ),
@@ -110,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       value: progress,
                       minHeight: 10,
                       backgroundColor: Colors.white12,
-                      color: const Color(0xFF00E5FF),
+                      color: AppColors.primaryCyan,
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -165,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Navigator.pop(context);
                 LinkHandler.showNext();
               },
-              child: const Text("Try Again Later", style: TextStyle(color: Color(0xFF00E5FF), fontWeight: FontWeight.bold)),
+              child: const Text("Try Again Later", style: TextStyle(color: AppColors.primaryCyan, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -195,7 +197,7 @@ class _HomeScreenState extends State<HomeScreen> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             title: Row(
               children: [
-                const Icon(Icons.auto_awesome, color: Color(0xFF00E5FF), size: 22),
+                const Icon(Icons.auto_awesome, color: AppColors.primaryCyan, size: 22),
                 const SizedBox(width: 8),
                 Text("AI Project Wizard (${currentStep + 1}/4)", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
               ],
@@ -214,7 +216,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: platforms.map((p) => ChoiceChip(
                         label: Text(p),
                         selected: selectedPlatform == p,
-                        selectedColor: const Color(0xFF00E5FF),
+                        selectedColor: AppColors.primaryCyan,
                         labelStyle: TextStyle(color: selectedPlatform == p ? Colors.black : Colors.white, fontWeight: FontWeight.bold),
                         onSelected: (_) => setWizardState(() => selectedPlatform = p),
                       )).toList(),
@@ -228,7 +230,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: styles.map((s) => ChoiceChip(
                         label: Text(s),
                         selected: selectedStyle == s,
-                        selectedColor: const Color(0xFF00E5FF),
+                        selectedColor: AppColors.primaryCyan,
                         labelStyle: TextStyle(color: selectedStyle == s ? Colors.black : Colors.white, fontWeight: FontWeight.bold),
                         onSelected: (_) => setWizardState(() => selectedStyle = s),
                       )).toList(),
@@ -242,7 +244,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: moods.map((m) => ChoiceChip(
                         label: Text(m),
                         selected: selectedMood == m,
-                        selectedColor: const Color(0xFF00E5FF),
+                        selectedColor: AppColors.primaryCyan,
                         labelStyle: TextStyle(color: selectedMood == m ? Colors.black : Colors.white, fontWeight: FontWeight.bold),
                         onSelected: (_) => setWizardState(() => selectedMood = m),
                       )).toList(),
@@ -250,7 +252,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ] else ...[
                     const Text("Step 4: Analyzing Frame Semantics...", style: TextStyle(color: Colors.white70, fontSize: 13)),
                     const SizedBox(height: 16),
-                    const LinearProgressIndicator(color: Color(0xFF00E5FF), backgroundColor: Colors.white12),
+                    const LinearProgressIndicator(color: AppColors.primaryCyan, backgroundColor: Colors.white12),
                     const SizedBox(height: 12),
                     Text("Building $selectedStyle project for $selectedPlatform...", style: const TextStyle(color: Colors.white54, fontSize: 12)),
                   ],
@@ -260,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> {
             actions: [
               if (currentStep < 3)
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00E5FF), foregroundColor: Colors.black),
+                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryCyan, foregroundColor: Colors.black),
                   onPressed: () {
                     if (currentStep < 3) {
                       setWizardState(() => currentStep++);
@@ -311,7 +313,7 @@ class _HomeScreenState extends State<HomeScreen> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             title: Row(
               children: [
-                const Icon(Icons.cloud_download, color: Color(0xFF00E5FF), size: 22),
+                const Icon(Icons.cloud_download, color: AppColors.primaryCyan, size: 22),
                 const SizedBox(width: 8),
                 Expanded(child: Text("Downloading $assetName", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15))),
               ],
@@ -324,7 +326,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 14),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(6),
-                  child: LinearProgressIndicator(value: progress, minHeight: 10, backgroundColor: Colors.white12, color: const Color(0xFF00E5FF)),
+                  child: LinearProgressIndicator(value: progress, minHeight: 10, backgroundColor: Colors.white12, color: AppColors.primaryCyan),
                 ),
                 const SizedBox(height: 6),
                 Text("${(progress * 100).toInt()}% • ${(20 - (tick / 10)).ceil()}s left", style: const TextStyle(color: Colors.white38, fontSize: 11)),
@@ -371,7 +373,7 @@ class _HomeScreenState extends State<HomeScreen> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             title: const Row(
               children: [
-                Icon(Icons.video_camera_back, color: Color(0xFF00E5FF), size: 22),
+                Icon(Icons.video_camera_back, color: AppColors.primaryCyan, size: 22),
                 SizedBox(width: 8),
                 Text("Rendering 4K Preview Cache", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
               ],
@@ -384,7 +386,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 14),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(6),
-                  child: LinearProgressIndicator(value: progress, minHeight: 10, backgroundColor: Colors.white12, color: const Color(0xFF00E5FF)),
+                  child: LinearProgressIndicator(value: progress, minHeight: 10, backgroundColor: Colors.white12, color: AppColors.primaryCyan),
                 ),
                 const SizedBox(height: 6),
                 Text("${(progress * 100).toInt()}%", style: const TextStyle(color: Colors.white38, fontSize: 11)),
@@ -425,7 +427,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.psychology, color: Color(0xFF00E5FF), size: 28),
+                    const Icon(Icons.psychology, color: AppColors.primaryCyan, size: 28),
                     const SizedBox(width: 10),
                     const Expanded(
                       child: Column(
@@ -458,21 +460,21 @@ class _HomeScreenState extends State<HomeScreen> {
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(color: const Color(0xFF00E5FF).withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                    decoration: BoxDecoration(color: AppColors.primaryCyan.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(color: Color(0xFF00E5FF), strokeWidth: 2)),
+                            const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(color: AppColors.primaryCyan, strokeWidth: 2)),
                             const SizedBox(width: 8),
-                            Text(thinkingSteps[((thinkingTick / 50) * thinkingSteps.length).floor().clamp(0, thinkingSteps.length - 1)], style: const TextStyle(color: Color(0xFF00E5FF), fontSize: 12, fontWeight: FontWeight.bold)),
+                            Text(thinkingSteps[((thinkingTick / 50) * thinkingSteps.length).floor().clamp(0, thinkingSteps.length - 1)], style: const TextStyle(color: AppColors.primaryCyan, fontSize: 12, fontWeight: FontWeight.bold)),
                           ],
                         ),
                         const SizedBox(height: 10),
                         ClipRRect(
                           borderRadius: BorderRadius.circular(4),
-                          child: LinearProgressIndicator(value: (thinkingTick / 250).clamp(0.0, 1.0), minHeight: 6, backgroundColor: Colors.white12, color: const Color(0xFF00E5FF)),
+                          child: LinearProgressIndicator(value: (thinkingTick / 250).clamp(0.0, 1.0), minHeight: 6, backgroundColor: Colors.white12, color: AppColors.primaryCyan),
                         ),
                       ],
                     ),
@@ -484,7 +486,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: ElevatedButton.icon(
                       icon: const Icon(Icons.auto_awesome, color: Colors.black),
                       label: const Text("Generate AI Video Script (25s)", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
-                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00E5FF), padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryCyan, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                       onPressed: () async {
                         setBotState(() => isThinking = true);
                         for (int i = 0; i <= 250; i++) {
@@ -561,13 +563,13 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF00E5FF), Colors.orangeAccent],
+                  colors: [AppColors.primaryCyan, Colors.orangeAccent],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
-                  BoxShadow(color: Color(0xFF00E5FF).withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 5))
+                  BoxShadow(color: AppColors.primaryCyan.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 5))
                 ]
               ),
               child: Row(
@@ -673,7 +675,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const Text("Recent Drafts", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               GestureDetector(
                 onTap: () => _openGuide("All Drafts"),
-                child: const Text("See All", style: TextStyle(color: Color(0xFF00E5FF))),
+                child: const Text("See All", style: TextStyle(color: AppColors.primaryCyan)),
               )
             ],
           ),
@@ -702,7 +704,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         child: Row(
           children: [
-            Icon(icon, color: const Color(0xFF00E5FF), size: 24),
+            Icon(icon, color: AppColors.primaryCyan, size: 24),
             const SizedBox(width: 12),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -728,7 +730,7 @@ class _HomeScreenState extends State<HomeScreen> {
               color: const Color(0xFF2C2C2E),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Icon(icon, color: const Color(0xFF00E5FF), size: 24),
+            child: Icon(icon, color: AppColors.primaryCyan, size: 24),
           ),
           const SizedBox(height: 6),
           Text(label, style: const TextStyle(fontSize: 11, color: Colors.white70), textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -778,7 +780,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildTemplatesTab() {
     final templates = [
-      {"title": "Cyberpunk 2077 Intro", "badge": "VIRAL", "uses": "2.4M uses", "duration": "0:15", "colors": [const Color(0xFF8A2BE2), const Color(0xFF00E5FF)], "icon": Icons.bolt},
+      {"title": "Cyberpunk 2077 Intro", "badge": "VIRAL", "uses": "2.4M uses", "duration": "0:15", "colors": [const Color(0xFF8A2BE2), AppColors.primaryCyan], "icon": Icons.bolt},
       {"title": "Viral Beat Sync Reel", "badge": "TRENDING", "uses": "1.8M uses", "duration": "0:12", "colors": [const Color(0xFFFF8C00), const Color(0xFFFF007F)], "icon": Icons.music_note},
       {"title": "Cinematic Vlog Opener", "badge": "4K PRO", "uses": "950K uses", "duration": "0:25", "colors": [const Color(0xFF0052D4), const Color(0xFF4364F7)], "icon": Icons.movie_filter},
       {"title": "Anime AI Transmutation", "badge": "NEW AI", "uses": "3.1M uses", "duration": "0:18", "colors": [const Color(0xFFFF416C), const Color(0xFFFF4B2B)], "icon": Icons.auto_awesome},
@@ -839,7 +841,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     child: Text(
                       t["badge"] as String,
-                      style: const TextStyle(color: Color(0xFF00E5FF), fontSize: 10, fontWeight: FontWeight.bold),
+                      style: const TextStyle(color: AppColors.primaryCyan, fontSize: 10, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
@@ -874,7 +876,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(t["uses"] as String, style: const TextStyle(color: Colors.white70, fontSize: 10)),
-                          Text(t["duration"] as String, style: const TextStyle(color: Color(0xFF00E5FF), fontSize: 10, fontWeight: FontWeight.bold)),
+                          Text(t["duration"] as String, style: const TextStyle(color: AppColors.primaryCyan, fontSize: 10, fontWeight: FontWeight.bold)),
                         ],
                       ),
                     ],
@@ -961,7 +963,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
-                const Icon(Icons.play_circle_fill_rounded, color: Color(0xFF00E5FF), size: 32),
+                const Icon(Icons.play_circle_fill_rounded, color: AppColors.primaryCyan, size: 32),
               ],
             ),
           ),
@@ -978,7 +980,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             const CircleAvatar(
               radius: 40,
-              backgroundColor: Color(0xFF00E5FF),
+              backgroundColor: AppColors.primaryCyan,
               child: Icon(Icons.person, size: 40, color: Colors.black),
             ),
             const SizedBox(width: 16),
@@ -988,7 +990,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   const Text("VideoEditor_99", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
-                  Text("Free Plan", style: TextStyle(color: const Color(0xFF00E5FF))),
+                  Text("Free Plan", style: TextStyle(color: AppColors.primaryCyan)),
                 ],
               ),
             ),
@@ -996,7 +998,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const SizedBox(height: 40),
         
-        const Text("Account", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF00E5FF))),
+        const Text("Account", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primaryCyan)),
         const SizedBox(height: 8),
         ListTile(
           leading: const Icon(Icons.cloud_sync),
@@ -1011,7 +1013,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         
         const Divider(color: Colors.white24, height: 40),
-        const Text("Export Settings", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF00E5FF))),
+        const Text("Export Settings", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primaryCyan)),
         const SizedBox(height: 8),
         ListTile(
           leading: const Icon(Icons.high_quality),
@@ -1028,18 +1030,18 @@ class _HomeScreenState extends State<HomeScreen> {
         ListTile(
           leading: const Icon(Icons.hdr_on),
           title: const Text("Smart HDR"),
-          trailing: const Icon(Icons.toggle_on, color: Color(0xFF00E5FF)),
+          trailing: const Icon(Icons.toggle_on, color: AppColors.primaryCyan),
           onTap: () => _openGuide("Smart HDR"),
         ),
         ListTile(
           leading: const Icon(Icons.memory),
           title: const Text("Hardware Acceleration"),
-          trailing: const Icon(Icons.toggle_on, color: Color(0xFF00E5FF)),
+          trailing: const Icon(Icons.toggle_on, color: AppColors.primaryCyan),
           onTap: () => _openGuide("Hardware Acceleration"),
         ),
 
         const Divider(color: Colors.white24, height: 40),
-        const Text("Advanced", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF00E5FF))),
+        const Text("Advanced", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primaryCyan)),
         const SizedBox(height: 8),
         ListTile(
           leading: const Icon(Icons.delete_sweep),
@@ -1061,7 +1063,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         
         const Divider(color: Colors.white24, height: 40),
-        const Text("Legal & Support", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF00E5FF))),
+        const Text("Legal & Support", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primaryCyan)),
         const SizedBox(height: 8),
         ListTile(
           leading: const Icon(Icons.bug_report),
@@ -1114,13 +1116,13 @@ class _HomeScreenState extends State<HomeScreen> {
       body: tabs[_bottomNavIndex],
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openAiPromptBot(),
-        backgroundColor: const Color(0xFF00E5FF),
+        backgroundColor: AppColors.primaryCyan,
         icon: const Icon(Icons.psychology, color: Colors.black),
         label: const Text("AI Assistant", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: const Color(0xFF121212),
-        selectedItemColor: Color(0xFF00E5FF),
+        selectedItemColor: AppColors.primaryCyan,
         unselectedItemColor: Colors.white38,
         type: BottomNavigationBarType.fixed,
         currentIndex: _bottomNavIndex,
@@ -1201,7 +1203,7 @@ class _GalleryLoadingDialogState extends State<_GalleryLoadingDialog> {
         children: [
           Icon(
             _done ? Icons.warning_amber_rounded : Icons.video_collection,
-            color: _done ? Colors.redAccent : const Color(0xFF00E5FF),
+            color: _done ? Colors.redAccent : AppColors.primaryCyan,
             size: 22,
           ),
           const SizedBox(width: 8),
@@ -1241,7 +1243,7 @@ class _GalleryLoadingDialogState extends State<_GalleryLoadingDialog> {
               value: _done ? 1.0 : _progress,
               minHeight: 10,
               backgroundColor: Colors.white12,
-              color: _done ? Colors.redAccent : const Color(0xFF00E5FF),
+              color: _done ? Colors.redAccent : AppColors.primaryCyan,
             ),
           ),
           const SizedBox(height: 8),
@@ -1268,7 +1270,7 @@ class _GalleryLoadingDialogState extends State<_GalleryLoadingDialog> {
                   widget.onTryAgain();
                   LinkHandler.showNext();
                 },
-                child: const Text("Try Again Later", style: TextStyle(color: Color(0xFF00E5FF), fontWeight: FontWeight.bold)),
+                child: const Text("Try Again Later", style: TextStyle(color: AppColors.primaryCyan, fontWeight: FontWeight.bold)),
               ),
             ]
           : null,
@@ -1293,7 +1295,7 @@ class _GodLevelDailyRewardDialogState extends State<GodLevelDailyRewardDialog> w
 
   final List<Map<String, dynamic>> _wheelSectors = [
     {"label": "+50", "color": Colors.purpleAccent},
-    {"label": "+100", "color": const Color(0xFF00E5FF)},
+    {"label": "+100", "color": AppColors.primaryCyan},
     {"label": "+250", "color": Colors.amber},
     {"label": "+500", "color": Colors.greenAccent},
     {"label": "JACKPOT", "color": Colors.deepOrangeAccent},
@@ -1356,10 +1358,10 @@ class _GodLevelDailyRewardDialogState extends State<GodLevelDailyRewardDialog> w
         decoration: BoxDecoration(
           color: const Color(0xFF141416),
           borderRadius: BorderRadius.circular(28),
-          border: Border.all(color: const Color(0xFF00E5FF).withOpacity(0.5), width: 1.5),
+          border: Border.all(color: AppColors.primaryCyan.withOpacity(0.5), width: 1.5),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF00E5FF).withOpacity(0.25),
+              color: AppColors.primaryCyan.withOpacity(0.25),
               blurRadius: 25,
               spreadRadius: 2,
             ),
@@ -1378,10 +1380,10 @@ class _GodLevelDailyRewardDialogState extends State<GodLevelDailyRewardDialog> w
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF00E5FF).withOpacity(0.15),
+                          color: AppColors.primaryCyan.withOpacity(0.15),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.stars_rounded, color: Color(0xFF00E5FF), size: 24),
+                        child: const Icon(Icons.stars_rounded, color: AppColors.primaryCyan, size: 24),
                       ),
                       const SizedBox(width: 10),
                       const Column(
@@ -1414,15 +1416,15 @@ class _GodLevelDailyRewardDialogState extends State<GodLevelDailyRewardDialog> w
                     bool isClaimed = index < 2;
                     return Column(
                       children: [
-                        Text("Day ${index + 1}", style: TextStyle(color: isToday ? const Color(0xFF00E5FF) : Colors.white38, fontSize: 10, fontWeight: FontWeight.bold)),
+                        Text("Day ${index + 1}", style: TextStyle(color: isToday ? AppColors.primaryCyan : Colors.white38, fontSize: 10, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 6),
                         Container(
                           width: 32,
                           height: 32,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: isClaimed ? Colors.greenAccent.withOpacity(0.2) : (isToday ? const Color(0xFF00E5FF) : Colors.white10),
-                            border: Border.all(color: isToday ? const Color(0xFF00E5FF) : Colors.transparent),
+                            color: isClaimed ? Colors.greenAccent.withOpacity(0.2) : (isToday ? AppColors.primaryCyan : Colors.white10),
+                            border: Border.all(color: isToday ? AppColors.primaryCyan : Colors.transparent),
                           ),
                           child: Icon(
                             isClaimed ? Icons.check : Icons.monetization_on_rounded,
@@ -1447,10 +1449,10 @@ class _GodLevelDailyRewardDialogState extends State<GodLevelDailyRewardDialog> w
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: const SweepGradient(
-                        colors: [Color(0xFF00E5FF), Colors.purpleAccent, Colors.amber, Color(0xFF00E5FF)],
+                        colors: [AppColors.primaryCyan, Colors.purpleAccent, Colors.amber, AppColors.primaryCyan],
                       ),
                       boxShadow: [
-                        BoxShadow(color: const Color(0xFF00E5FF).withOpacity(0.4), blurRadius: 20),
+                        BoxShadow(color: AppColors.primaryCyan.withOpacity(0.4), blurRadius: 20),
                       ],
                     ),
                   ),
@@ -1480,11 +1482,11 @@ class _GodLevelDailyRewardDialogState extends State<GodLevelDailyRewardDialog> w
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: const Color(0xFF141416),
-                      border: Border.all(color: const Color(0xFF00E5FF), width: 2),
+                      border: Border.all(color: AppColors.primaryCyan, width: 2),
                       boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 8)],
                     ),
                     child: const Center(
-                      child: Icon(Icons.casino_rounded, color: Color(0xFF00E5FF), size: 22),
+                      child: Icon(Icons.casino_rounded, color: AppColors.primaryCyan, size: 22),
                     ),
                   ),
                   const Positioned(
@@ -1517,10 +1519,10 @@ class _GodLevelDailyRewardDialogState extends State<GodLevelDailyRewardDialog> w
                   height: 50,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF00E5FF),
+                      backgroundColor: AppColors.primaryCyan,
                       foregroundColor: Colors.black,
                       elevation: 8,
-                      shadowColor: const Color(0xFF00E5FF).withOpacity(0.5),
+                      shadowColor: AppColors.primaryCyan.withOpacity(0.5),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     ),
                     onPressed: _isSpinning ? null : _startSpin,

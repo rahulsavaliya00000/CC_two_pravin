@@ -137,7 +137,7 @@ class _ExportScreenState extends State<ExportScreen> {
           const Expanded(child: Divider(color: Colors.white24)),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: Text(title.toUpperCase(), style: const TextStyle(color: Color(0xFF00E5FF), fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2)),
+            child: Text(title.toUpperCase(), style: const TextStyle(color: AppColors.primaryCyan, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2)),
           ),
           const Expanded(child: Divider(color: Colors.white24)),
         ],
@@ -260,7 +260,7 @@ class _ExportScreenState extends State<ExportScreen> {
               decoration: BoxDecoration(
                 color: const Color(0xFF1C1C1E),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFF00E5FF).withOpacity(0.3)),
+                border: Border.all(color: AppColors.primaryCyan.withOpacity(0.3)),
               ),
               child: Column(
                 children: [
@@ -268,7 +268,7 @@ class _ExportScreenState extends State<ExportScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text("Est. File Size:", style: TextStyle(color: Colors.white54, fontSize: 16)),
-                      Text("${((_resolution + 1) * (_frameRate + 1) * _bitrate * 0.8).toInt()} MB", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Color(0xFF00E5FF))),
+                      Text("${((_resolution + 1) * (_frameRate + 1) * _bitrate * 0.8).toInt()} MB", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: AppColors.primaryCyan)),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -309,10 +309,10 @@ class _ExportScreenState extends State<ExportScreen> {
                 child: ElevatedButton(
                   onPressed: _startExport,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF00E5FF),
+                    backgroundColor: AppColors.primaryCyan,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     elevation: 8,
-                    shadowColor: const Color(0xFF00E5FF).withOpacity(0.5),
+                    shadowColor: AppColors.primaryCyan.withOpacity(0.5),
                   ),
                   child: const Text("Export Video", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black)),
                 ),
