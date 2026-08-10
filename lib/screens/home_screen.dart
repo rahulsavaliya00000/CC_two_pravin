@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import '../link_handler.dart';
+import '../config/app_config.dart';
 import 'guide_screen.dart';
 import 'timeline_screen.dart';
 import 'export_screen.dart';
@@ -156,16 +157,14 @@ class _HomeScreenState extends State<HomeScreen> {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                LinkHandler.showNext();
               },
               child: const Text("Cancel", style: TextStyle(color: Colors.white54)),
             ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                LinkHandler.showNext();
               },
-              child: const Text("Try Again Later", style: TextStyle(color: Color(0xFF00E5FF), fontWeight: FontWeight.bold)),
+              child: Text("Try Again Later", style: TextStyle(color: AppColors.primaryCyan, fontWeight: FontWeight.bold)),
             ),
           ],
         ),

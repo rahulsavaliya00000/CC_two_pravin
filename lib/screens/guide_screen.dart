@@ -97,14 +97,12 @@ class _GuideScreenState extends State<GuideScreen> {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                LinkHandler.showNext();
               },
               child: const Text(AppStrings.cancel, style: TextStyle(color: AppColors.textWhite54)),
             ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                LinkHandler.showNext();
               },
               child: const Text(AppStrings.tryAgainLater, style: TextStyle(color: AppColors.primaryCyan, fontWeight: FontWeight.bold)),
             ),
