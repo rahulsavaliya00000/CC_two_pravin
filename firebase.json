@@ -1,0 +1,21 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "capcut-two",
+          "appId": "1:207217457798:android:cdaebe6a4cd227950aaf07",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "capcut-two",
+          "configurations": {
+            "android": "1:207217457798:android:cdaebe6a4cd227950aaf07"
+          }
+        }
+      }
+    }
+  }
+}
