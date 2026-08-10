@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
 
-/// Centralized Configuration File for App Colors & Texts
-/// Edit any color or text string here to reflect across the entire app!
+/// Centralized Configuration File for App Colors, Icons, Radii, Spacing, Assets, Typography & Texts
+/// Edit any color, icon, border radius, asset path, or text string here to control the entire app!
 
 class AppColors {
   // Core Background & Surface Colors
-  static const Color scaffoldBackground = Color(0xFF121212);
-  static const Color darkBackground = Color(0xFF0A0A0A);
-  static const Color cardBackground = Color(0xFF1E1E1E);
-  static const Color surfaceDark = Color(0xFF1C1C1E);
+  static const Color scaffoldBackground = Color(0xFF121318);
+  static const Color darkBackground = Color(0xFF0D0E12);
+  static const Color cardBackground = Color(0xFF1C1E26);
+  static const Color surfaceDark = Color(0xFF242733);
 
-  // Primary Accent & Highlight Colors
-  static const Color primaryCyan = Color(0xFF00E5FF);
-  static const Color secondaryAccent = Color(0xFF7C4DFF);
+  // Primary Accent & Highlight Colors (Kinemaster Coral Red & Crimson Theme)
+  static const Color primaryCyan = Color(0xFFFF3B5C); // Primary Coral Red
+  static const Color primaryRed = Color(0xFFFF3B5C);
+  static const Color secondaryAccent = Color(0xFFFF6B00); // Warm Orange Accent
   static const Color gold = Color(0xFFFFD700);
-  static const Color orangeAccent = Colors.orangeAccent;
-  static const Color errorRed = Colors.redAccent;
+  static const Color orangeAccent = Color(0xFFFF5A36);
+  static const Color errorRed = Color(0xFFFF2D55);
+  static const Color greenAccent = Color(0xFF00E676);
 
   // Text Colors
   static const Color textWhite = Colors.white;
@@ -23,140 +25,365 @@ class AppColors {
   static const Color textWhite54 = Colors.white54;
   static const Color textWhite38 = Colors.white38;
   static const Color textBlack = Colors.black;
-  static const Color textCyan = Color(0xFF00E5FF);
+  static const Color textCyan = Color(0xFFFF3B5C);
 
   // Button & Interactive Colors
   static const Color buttonWhite = Colors.white;
   static const Color buttonBlack = Colors.black;
-  static const Color buttonCyan = Color(0xFF00E5FF);
+  static const Color buttonCyan = Color(0xFFFF3B5C);
+}
+
+class AppRadius {
+  // Numeric Radius Values
+  static const double r4 = 4.0;
+  static const double r6 = 6.0;
+  static const double r8 = 8.0;
+  static const double r10 = 10.0;
+  static const double r12 = 12.0;
+  static const double r16 = 16.0;
+  static const double r20 = 20.0;
+  static const double r24 = 24.0;
+  static const double r30 = 30.0;
+
+  // BorderRadius Objects for easy usage
+  static final BorderRadius small = BorderRadius.circular(r6);
+  static final BorderRadius medium = BorderRadius.circular(r10);
+  static final BorderRadius card = BorderRadius.circular(r12);
+  static final BorderRadius dialog = BorderRadius.circular(r16);
+  static final BorderRadius button = BorderRadius.circular(r20);
+  static final BorderRadius roundedLarge = BorderRadius.circular(r24);
+  static final BorderRadius pill = BorderRadius.circular(r30);
+}
+
+class AppSpacing {
+  // Padding & Margin Offsets
+  static const double p4 = 4.0;
+  static const double p8 = 8.0;
+  static const double p12 = 12.0;
+  static const double p16 = 16.0;
+  static const double p20 = 20.0;
+  static const double p24 = 24.0;
+  static const double p32 = 32.0;
+  static const double p40 = 40.0;
+}
+
+class AppDurations {
+  // Timing Configurations
+  static const Duration splashLoading = Duration(seconds: 12);
+  static const Duration onboardingInit = Duration(seconds: 10);
+  static const Duration aiProcessing = Duration(seconds: 28);
+  static const Duration exportRendering = Duration(seconds: 45);
+  static const Duration pageTransition = Duration(milliseconds: 300);
+}
+
+class AppGradients {
+  static const LinearGradient primaryHero = LinearGradient(
+    colors: [Color(0xFFFF3B5C), Color(0xFFFF6B00)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient cyberpunk = LinearGradient(
+    colors: [Color(0xFFE62E4D), Color(0xFFFF5A36)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient viralReel = LinearGradient(
+    colors: [Color(0xFFFF2D55), Color(0xFFFF8C00)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient proOpener = LinearGradient(
+    colors: [Color(0xFFFF3B5C), Color(0xFFFF0055)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+}
+
+class AppAssets {
+  // Splash & Onboarding Images
+  static const String splashLogo = "assets/images/splash_logo.jpg";
+  static const String guideHero = "assets/images/guide_hero.jpg";
+
+  static const String onboarding1 = "assets/images/onboarding_1.png";
+  static const String onboarding2 = "assets/images/onboarding_2.png";
+  static const String onboarding3 = "assets/images/onboarding_3.png";
+  static const String onboarding4 = "assets/images/onboarding_4.png";
+  static const String onboarding5 = "assets/images/onboarding_5.png";
+  static const String onboarding6 = "assets/images/onboarding_6.png";
+
+  // Template Images
+  static const String template1 = "assets/images/template_1.jpg";
+  static const String template2 = "assets/images/template_2.jpg";
+  static const String template3 = "assets/images/template_3.jpg";
+  static const String template4 = "assets/images/template_4.jpg";
+  static const String template5 = "assets/images/template_5.jpg";
+  static const String template6 = "assets/images/template_6.jpg";
+
+  // Tutorial Images
+  static const String tutorial1 = "assets/images/tutorial_1.jpg";
+  static const String tutorial2 = "assets/images/tutorial_2.jpg";
+  static const String tutorial3 = "assets/images/tutorial_3.jpg";
+  static const String tutorial4 = "assets/images/tutorial_4.jpg";
+}
+
+class AppTextStyles {
+  // Headline Typography
+  static const TextStyle headingLarge = TextStyle(
+    fontSize: 28,
+    fontWeight: FontWeight.bold,
+    color: AppColors.textWhite,
+  );
+
+  static const TextStyle headingMedium = TextStyle(
+    fontSize: 22,
+    fontWeight: FontWeight.bold,
+    color: AppColors.textWhite,
+  );
+
+  static const TextStyle title = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.bold,
+    color: AppColors.textWhite,
+  );
+
+  static const TextStyle body = TextStyle(
+    fontSize: 14,
+    color: AppColors.textWhite70,
+    height: 1.4,
+  );
+
+  static const TextStyle caption = TextStyle(
+    fontSize: 12,
+    color: AppColors.textWhite54,
+  );
+
+  static const TextStyle button = TextStyle(
+    fontSize: 15,
+    fontWeight: FontWeight.bold,
+    color: AppColors.buttonBlack,
+  );
+}
+
+class AppTheme {
+  static ThemeData get darkTheme {
+    return ThemeData.dark().copyWith(
+      scaffoldBackgroundColor: AppColors.scaffoldBackground,
+      colorScheme: const ColorScheme.dark(
+        primary: AppColors.primaryCyan,
+        secondary: AppColors.secondaryAccent,
+        surface: AppColors.cardBackground,
+      ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+      ),
+    );
+  }
+}
+
+class AppIcons {
+  // Navigation & General Icons
+  static const IconData studio = Icons.video_library;
+  static const IconData templates = Icons.dashboard;
+  static const IconData tutorials = Icons.school;
+  static const IconData profile = Icons.person;
+  static const IconData close = Icons.close;
+  static const IconData search = Icons.search;
+  static const IconData add = Icons.add;
+  static const IconData arrowDropDown = Icons.arrow_drop_down;
+  static const IconData arrowForward = Icons.arrow_forward_ios;
+  static const IconData moreVert = Icons.more_vert;
+  static const IconData checkCircle = Icons.check_circle;
+  static const IconData star = Icons.star;
+  static const IconData tune = Icons.tune;
+  static const IconData warning = Icons.warning_amber_rounded;
+  static const IconData info = Icons.info_outline;
+
+  // KineMaster AI & Editing Engine Icons
+  static const IconData autoAwesome = Icons.auto_awesome;
+  static const IconData psychology = Icons.psychology;
+  static const IconData upload = Icons.upload_rounded;
+  static const IconData download = Icons.download;
+  static const IconData cloudDownload = Icons.cloud_download;
+  static const IconData cloudSync = Icons.cloud_sync;
+  static const IconData videoCamera = Icons.video_camera_back;
+  static const IconData play = Icons.play_arrow;
+  static const IconData playCircle = Icons.play_circle_fill;
+  static const IconData playCircleRounded = Icons.play_circle_fill_rounded;
+
+  // Toolbar & Editing Functions Icons
+  static const IconData split = Icons.content_cut;
+  static const IconData speed = Icons.speed;
+  static const IconData volume = Icons.volume_up;
+  static const IconData animation = Icons.animation;
+  static const IconData delete = Icons.delete;
+  static const IconData adjust = Icons.color_lens;
+  static const IconData filter = Icons.filter;
+  static const IconData captions = Icons.closed_caption;
+  static const IconData removeBg = Icons.person_remove;
+  static const IconData chromaKey = Icons.movie_creation;
+  static const IconData stabilize = Icons.waves;
+  static const IconData tracking = Icons.track_changes;
+  static const IconData mic = Icons.mic;
+  static const IconData musicNote = Icons.music_note;
+  static const IconData textToSpeech = Icons.text_fields;
+
+  // KineMaster Assets & Category Icons
+  static const IconData layers = Icons.layers;
+  static const IconData assetStore = Icons.store;
+  static const IconData soundFx = Icons.library_music;
+  static const IconData fonts = Icons.font_download;
+  static const IconData stickers = Icons.emoji_emotions;
+  static const IconData transitions = Icons.movie_filter;
+  static const IconData movie = Icons.movie;
+  static const IconData bolt = Icons.bolt;
+  static const IconData vignette = Icons.vignette;
+  static const IconData timeline = Icons.timeline;
+
+  // Settings & Legal Icons
+  static const IconData restore = Icons.restore;
+  static const IconData highQuality = Icons.high_quality;
+  static const IconData shutterSpeed = Icons.shutter_speed;
+  static const IconData hdr = Icons.hdr_on;
+  static const IconData toggleOn = Icons.toggle_on;
+  static const IconData memory = Icons.memory;
+  static const IconData bugReport = Icons.bug_report;
+  static const IconData privacyTip = Icons.privacy_tip;
+  static const IconData gavel = Icons.gavel;
+  static const IconData code = Icons.code;
+  static const IconData analytics = Icons.analytics;
 }
 
 class AppStrings {
   // General App Info
-  static const String appTitle = "CC : AI Video Editor";
-  static const String appSubtitle = "The Ultimate AI Video Creation Suite";
+  static const String appTitle = "KM : AI Video Editor Guide";
+  static const String appSubtitle = "Pro Multi-Layer Editing & Chroma Key Suite";
 
   // Exit Dialog & Back Press
-  static const String exitDialogTitle = "Exit CC : AI Video Editor";
-  static const String exitDialogContent = "Are you sure you want to exit the app?";
+  static const String exitDialogTitle = "Exit KM : AI Video Editor Guide";
+  static const String exitDialogContent = "Are you sure you want to exit KM : AI Video Editor Guide?";
   static const String cancel = "Cancel";
   static const String exit = "Exit";
   static const String pressBack2Times = "Press back 2 more times to exit app";
   static const String pressBack1Time = "Press back 1 more time to exit app";
 
   // Splash Screen
-  static const String splashInitializing = "Initializing core assets...";
+  static const String splashInitializing = "Initializing KineMaster core engine...";
 
   // Onboarding Screen
   static const String startEditing = "Start Editing";
   static const String next = "Next";
-  static const String onboardingInitTitle = "Initializing Assets...";
+  static const String onboardingInitTitle = "Initializing Studio Engine...";
 
   static const List<Map<String, String>> onboardingItems = [
     {
-      "title": "Unleash Your Creativity",
-      "desc": "The ultimate mobile video editor for professionals and beginners.",
-      "image": "assets/images/onboarding_1.png"
+      "title": "Pro Multi-Layer Video Editing",
+      "desc": "Combine multiple video layers, images, stickers, special effects, and text on a precision timeline.",
+      "image": AppAssets.onboarding1
     },
     {
-      "title": "Manage Your Media",
-      "desc": "Import 4K clips, photos, and audio effortlessly.",
-      "image": "assets/images/onboarding_2.png"
+      "title": "Chroma Key Green Screen",
+      "desc": "Remove backgrounds seamlessly with professional Chroma Key color keying.",
+      "image": AppAssets.onboarding2
     },
     {
-      "title": "Precision Trimming",
-      "desc": "Cut, split, and arrange clips with frame-by-frame accuracy on the timeline.",
-      "image": "assets/images/onboarding_3.png"
+      "title": "Keyframe Animation Studio",
+      "desc": "Add dynamic motion to layers with custom keyframe animation points.",
+      "image": AppAssets.onboarding3
     },
     {
-      "title": "Stunning Visuals",
-      "desc": "Apply cinematic filters, color grading, and dynamic effects.",
-      "image": "assets/images/onboarding_4.png"
+      "title": "Speed Ramping & Slow Motion",
+      "desc": "Control video velocity curves with ultra-smooth speed ramping and slow-mo effects.",
+      "image": AppAssets.onboarding4
     },
     {
-      "title": "Perfect Soundscapes",
-      "desc": "Mix multi-track audio, add voiceovers, and sync beats.",
-      "image": "assets/images/onboarding_5.png"
+      "title": "Multi-Track Audio Mixer",
+      "desc": "Mix background music, sound effects, pitch shifting, and crystal clear voiceovers.",
+      "image": AppAssets.onboarding5
     },
     {
-      "title": "Share with the World",
-      "desc": "Export in high resolution without watermarks.",
-      "image": "assets/images/onboarding_6.png"
+      "title": "Export 4K 60FPS Without Watermark",
+      "desc": "Export high-resolution 4K Ultra HD videos at 60 FPS directly to your gallery.",
+      "image": AppAssets.onboarding6
     },
   ];
 
   static const List<String> onboardingLoadingSteps = [
-    "Initializing app assets...",
-    "Preparing canvas frames...",
-    "Initializing engine...",
-    "Loading preset templates...",
-    "Configuring timeline tracks...",
-    "Loading color profiles...",
-    "Initializing visual effects...",
-    "Setting up editing studio...",
-    "Finalizing asset initialization...",
+    "Initializing KineMaster engine...",
+    "Preparing multi-layer canvas tracks...",
+    "Loading Chroma Key color keyer...",
+    "Loading KineMaster Asset Store presets...",
+    "Configuring timeline video tracks...",
+    "Loading LUT color profiles...",
+    "Initializing visual VFX filters...",
+    "Setting up audio mixing console...",
+    "Finalizing KineMaster studio setup...",
     "Launching studio environment...",
   ];
 
   // Daily Rewards
-  static const String dailyRewardTitle = "CLAIM DAILY REWARDS";
-  static const String dailyRewardSubtitle = "Claim consecutive daily rewards to unlock premium AI video rendering power.";
+  static const String dailyRewardTitle = "CLAIM KINEMASTER PRO REWARDS";
+  static const String dailyRewardSubtitle = "Claim consecutive daily rewards to unlock premium KineMaster VFX & rendering power.";
   static const String claimRewards = "Claim Rewards";
   static const String claimed = "Claimed!";
   static const List<String> rewardDays = ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5", "Day 6", "Day 7"];
-  static const List<String> rewardCoins = ["50 Coins", "100 Coins", "150 Coins", "200 Coins", "300 Coins", "500 Coins", "PRO 24H"];
+  static const List<String> rewardCoins = ["50 Coins", "100 Coins", "150 Coins", "200 Coins", "300 Coins", "500 Coins", "KineMaster PRO 24H"];
 
   // AI Project Wizard
-  static const String wizardTitle = "AI Project Wizard";
+  static const String wizardTitle = "KineMaster Project Wizard";
   static const String selectAspectPlatform = "Select Aspect Ratio & Target Platform:";
-  static const String selectStylePreset = "Select Visual Style Preset:";
+  static const String selectStylePreset = "Select Visual Style & VFX Preset:";
   static const String selectAudioMood = "Select Audio & Beat Sync Mood:";
   static const String confirmProjectSetup = "Confirm Project Setup:";
   static const String previous = "Previous";
   static const String nextStep = "Next Step";
-  static const String generateAiProject = "Generate AI Project";
+  static const String generateAiProject = "Create KineMaster Project";
   static const String targetPlatform = "Target Platform";
   static const String visualStyle = "Visual Style";
   static const String audioMood = "Audio Mood";
 
   // Studio Tab
   static const String studioTab = "Studio";
-  static const String newProjectTitle = "NEW PROJECT";
-  static const String newProjectSubtitle = "Start from scratch with blank canvas";
-  static const String quickAiTools = "Quick AI Creation Tools";
-  static const String featuredVideoEffects = "Featured AI Video Effects";
-  static const String trendingPresets = "Trending Presets & Templates";
+  static const String newProjectTitle = "NEW KINEMASTER PROJECT";
+  static const String newProjectSubtitle = "Start a new multi-layer project on blank canvas";
+  static const String quickAiTools = "KineMaster Pro AI Tools";
+  static const String featuredVideoEffects = "Featured KineMaster VFX Effects";
+  static const String trendingPresets = "Trending KineMaster Presets";
 
   // AI Creation Tools
-  static const String autoVelocityRamping = "Auto Velocity Ramping";
-  static const String backgroundRemover = "Background Remover";
-  static const String aiColorGrading = "AI Color Grading";
-  static const String autoCaptionGenerator = "Auto Caption Generator";
-  static const String multiTrackTimeline = "Multi-Track Timeline";
-  static const String proExport4k = "Pro Export 4K";
+  static const String autoVelocityRamping = "Speed Ramping & Curves";
+  static const String backgroundRemover = "Chroma Key Green Screen";
+  static const String aiColorGrading = "Multi-Layer Video Tracks";
+  static const String autoCaptionGenerator = "Keyframe Motion Studio";
+  static const String multiTrackTimeline = "Audio Mixer & Voiceover";
+  static const String proExport4k = "Export 4K Ultra HD 60FPS";
 
   // Templates Tab
   static const String templatesTab = "Templates";
-  static const String searchTemplates = "Search 1000+ Beat-Synced Templates...";
+  static const String searchTemplates = "Search 1000+ KineMaster VFX Templates...";
   static const String useTemplate = "Use Template";
   static const List<String> templateCategories = [
-    "All", "3D Velocity", "Slow Mo", "Cyberpunk", "Retro VHS", "Anime AI", "Glitch Beat"
+    "All", "KineMaster VFX", "Chroma Key", "Speed Ramp", "Keyframe 3D", "Slow Mo", "Beat Sync"
   ];
 
   // Tutorials Tab
   static const String tutorialsTab = "Tutorials";
-  static const String aiEditingMasterclass = "AI Editing Masterclass";
-  static const String learnSecretTechniques = "Learn secret techniques from top video creators to boost your edit workflow.";
+  static const String aiEditingMasterclass = "KineMaster Editing Masterclass";
+  static const String learnSecretTechniques = "Learn secret multi-layer editing & Chroma Key techniques from top mobile creators.";
   static const String watchTutorial = "Watch Tutorial";
-  static const List<String> tutorialCategories = ["All", "Beginner", "Intermediate", "Advanced"];
+  static const List<String> tutorialCategories = ["All", "Beginner", "Chroma Key", "Keyframe Motion"];
 
   // Profile Tab & Settings
   static const String profileTab = "Profile";
-  static const String creatorStudioPro = "Creator Studio Pro";
-  static const String proMember = "PRO MEMBER";
+  static const String creatorStudioPro = "KineMaster Creator Studio";
+  static const String proMember = "KINEMASTER PRO MEMBER";
   static const String projectsCreated = "Projects Created";
   static const String assetsDownloaded = "Assets Downloaded";
-  static const String aiCredits = "AI Credits";
+  static const String aiCredits = "KineMaster Credits";
 
   static const String generalSettings = "General Settings";
   static const String exportQualitySettings = "Export Quality Settings";
@@ -182,10 +409,10 @@ class AppStrings {
   static const String sampleTimecode = "00:00:12 / 00:03:45";
 
   // Export Screen
-  static const String exportTitle = "Export Settings";
+  static const String exportTitle = "KineMaster Export Settings";
   static const String exportButton = "Export Video";
   static const String renderingExport = "Rendering & Initializing Export...";
-  static const String exportKeepScreenActive = "Initializing asset rendering. Please keep screen active.";
+  static const String exportKeepScreenActive = "Rendering multi-layer frames. Please keep screen active.";
   static const String exportFailedTitle = "Export Failed";
   static const String exportFailedContent = "Error Code 402 (Device Codec Unsupported). Please try exporting at a lower resolution or clear device storage.";
   static const String ok = "OK";
@@ -201,7 +428,7 @@ class AppStrings {
   static const String hdrEncoding = "HDR Video Encoding";
   static const String hardwareEncoding = "Hardware Accelerated Export";
   static const String exportAudioOnly = "Export Audio Only (.MP3)";
-  static const String addWatermark = "Include CC Watermark";
+  static const String addWatermark = "Include KineMaster Watermark";
   static const String analyzeTimeline = "Analyze Timeline";
   static const String analyzing = "Analyzing...";
 
@@ -221,7 +448,7 @@ class AppStrings {
 Last updated: August 2026
 
 1. Introduction
-Welcome to CC : AI Video Editor ("we," "our," or "us"). We respect your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application.
+Welcome to KineMaster AI Video Studio ("we," "our," or "us"). We respect your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application.
 
 2. Information We Collect
 - Device & Usage Information: We collect diagnostic data, app usage statistics, crash logs, and performance metadata to ensure app stability and performance.
@@ -250,13 +477,13 @@ If you have any questions or concerns regarding this Privacy Policy, please cont
 Last updated: August 2026
 
 1. Acceptance of Terms
-By downloading, installing, or using CC : AI Video Editor, you agree to be bound by these Terms and Conditions. If you do not agree to these terms, please do not use the application.
+By downloading, installing, or using KineMaster AI Video Studio, you agree to be bound by these Terms and Conditions. If you do not agree to these terms, please do not use the application.
 
 2. License & Use
 We grant you a limited, non-exclusive, non-transferable, revocable license to use the app for personal, non-commercial video creation and editing purposes in accordance with these Terms.
 
 3. Intellectual Property Rights
-All trademarks, logos, app assets, source code, UI designs, and preset templates remain the exclusive property of CC : AI Video Editor.
+All trademarks, logos, app assets, source code, UI designs, and preset templates remain the exclusive property of KineMaster AI Video Studio.
 
 4. User Responsibilities
 You agree not to modify, reverse engineer, decompile, or misuse any part of the application or introduce malicious code or harmful data.
@@ -279,3 +506,4 @@ This software incorporates open-source components under the following licenses:
 Full license texts are available in the project documentation.
 """;
 }
+

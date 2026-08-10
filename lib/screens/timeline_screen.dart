@@ -35,7 +35,7 @@ class TimelineScreen extends StatelessWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               title: Row(
                 children: [
-                  const Icon(Icons.tune, color: AppColors.primaryCyan, size: 20),
+                  const Icon(AppIcons.tune, color: AppColors.primaryCyan, size: 20),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -93,7 +93,7 @@ class TimelineScreen extends StatelessWidget {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: const Row(
             children: [
-              Icon(Icons.warning_amber_rounded, color: AppColors.orangeAccent, size: 24),
+              Icon(AppIcons.warning, color: AppColors.orangeAccent, size: 24),
               SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -131,14 +131,14 @@ class TimelineScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A0A),
+      backgroundColor: AppColors.darkBackground,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1C1C1E),
+        backgroundColor: AppColors.surfaceDark,
         elevation: 0,
         title: Text(projectName, style: const TextStyle(fontSize: 16)),
         centerTitle: true,
         actions: [
-          IconButton(icon: const Icon(Icons.download), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ExportScreen()))),
+          IconButton(icon: const Icon(AppIcons.download), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ExportScreen()))),
         ],
       ),
       body: Column(
@@ -152,10 +152,10 @@ class TimelineScreen extends StatelessWidget {
               alignment: Alignment.center,
               children: [
                 Image.asset("assets/images/guide_hero.jpg", fit: BoxFit.cover, width: double.infinity, height: double.infinity),
-                const Icon(Icons.play_arrow, size: 64, color: Colors.white54),
+                const Icon(AppIcons.play, size: 64, color: Colors.white54),
                 const Positioned(
                   bottom: 8,
-                  child: Text("00:00:12 / 00:03:45", style: TextStyle(color: Colors.white, backgroundColor: Colors.black45)),
+                  child: Text(AppStrings.sampleTimecode, style: TextStyle(color: Colors.white, backgroundColor: Colors.black45)),
                 )
               ],
             ),
@@ -165,7 +165,7 @@ class TimelineScreen extends StatelessWidget {
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 24),
-              color: const Color(0xFF121212),
+              color: AppColors.scaffoldBackground,
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -200,18 +200,18 @@ class TimelineScreen extends StatelessWidget {
           // Toolbar
           Container(
             height: 80,
-            color: const Color(0xFF1C1C1E),
+            color: AppColors.surfaceDark,
             child: ListView(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
-                _buildToolbarIcon(context, Icons.cut, "Split"),
-                _buildToolbarIcon(context, Icons.speed, "Speed"),
-                _buildToolbarIcon(context, Icons.volume_up, "Volume"),
-                _buildToolbarIcon(context, Icons.animation, "Animation"),
-                _buildToolbarIcon(context, Icons.delete, "Delete"),
-                _buildToolbarIcon(context, Icons.color_lens, "Adjust"),
-                _buildToolbarIcon(context, Icons.filter, "Filters"),
+                _buildToolbarIcon(context, AppIcons.split, AppStrings.split),
+                _buildToolbarIcon(context, AppIcons.speed, AppStrings.speed),
+                _buildToolbarIcon(context, AppIcons.volume, AppStrings.volume),
+                _buildToolbarIcon(context, AppIcons.animation, AppStrings.animation),
+                _buildToolbarIcon(context, AppIcons.delete, AppStrings.delete),
+                _buildToolbarIcon(context, AppIcons.adjust, AppStrings.adjust),
+                _buildToolbarIcon(context, AppIcons.filter, AppStrings.filters),
               ],
             ),
           )

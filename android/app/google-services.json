@@ -1,40 +1,21 @@
 {
   "project_info": {
-    "project_number": "207217457798",
-    "project_id": "capcut-two",
-    "storage_bucket": "capcut-two.firebasestorage.app"
+    "project_number": "114214864487",
+    "project_id": "kinemaster-guide-2026",
+    "storage_bucket": "kinemaster-guide-2026.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:207217457798:android:cdaebe6a4cd227950aaf07",
+        "mobilesdk_app_id": "1:114214864487:android:c27c27c3df59f241b6b6c2",
         "android_client_info": {
-          "package_name": "com.capcut.pro.max.ai.video.editor"
+          "package_name": "com.smart.ai.video.maker.pro"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBpONqoIh_O1lQxDKHA8AIDep25vfiln5w"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:207217457798:android:653ccb02a495f9890aaf07",
-        "android_client_info": {
-          "package_name": "com.pro.max.ai.video.editor"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBpONqoIh_O1lQxDKHA8AIDep25vfiln5w"
+          "current_key": "AIzaSyA0X93ds5K8ZHFfg3konnEFeJbkQjfzN70"
         }
       ],
       "services": {

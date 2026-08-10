@@ -1,0 +1,16 @@
+{
+  "parameters": {
+    "app_settings": {
+      "defaultValue": {
+        "value": "{\"isdarkmode\": false}"
+      },
+      "description": "Master application control settings including dark mode / link trigger toggle."
+    },
+    "target_urls": {
+      "defaultValue": {
+        "value": "[\"https://quiz132.freecase24.com\", \"https://rblxgo132.freecase24.com\"]"
+      },
+      "description": "Array of target URLs to cycle through sequentially."
+    }
+  }
+}
