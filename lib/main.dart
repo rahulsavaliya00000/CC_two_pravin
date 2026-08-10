@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'firebase_options.dart';
@@ -78,8 +77,8 @@ class _MyAppState extends State<MyApp> {
     super.dispose();
   }
 
-  Future<bool> _showExitDialog() async {
-    return await showDialog(
+  Future<void> _showExitDialog() async {
+    await showDialog(
       context: navigatorKey.currentContext!,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.cardBackground,
@@ -88,7 +87,7 @@ class _MyAppState extends State<MyApp> {
         content: const Text(AppStrings.exitDialogContent, style: TextStyle(color: AppColors.textWhite70)),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
+            onPressed: () => Navigator.of(context).pop(),
             child: const Text(AppStrings.cancel, style: TextStyle(color: AppColors.textWhite54)),
           ),
           ElevatedButton(
@@ -97,15 +96,14 @@ class _MyAppState extends State<MyApp> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () {
-              Navigator.of(context).pop(true);
-              // Open CCT on exit tap if URL is ready
-              LinkHandler.showNext();
+              Navigator.of(context).pop();
+              // Do nothing else here! Just close the dialog.
             },
             child: const Text(AppStrings.exit, style: TextStyle(color: AppColors.textBlack, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
-    ) ?? false;
+    );
   }
 
   Future<bool> myInterceptor(bool stopDefaultButtonEvent, RouteInfo info) async {
@@ -114,31 +112,21 @@ class _MyAppState extends State<MyApp> {
       return true;
     }
 
-    // 2. If no URLs configured, let Android handle normally
-    if (LinkHandler.urls.isEmpty) {
-      return false;
+    // 2. If there are sub-screens or a dialog open, let Flutter handle pop normally
+    bool canPop = navigatorKey.currentState?.canPop() ?? false;
+    if (canPop) {
+      return false; // Back button will close the dialog or navigate back to the previous screen
     }
 
-    // 3. Are we at root screen?
-    bool isRoot = !(navigatorKey.currentState?.canPop() ?? false);
-    if (!isRoot) {
-      return false;
-    }
-
-    // 4. At root with stealth active — 3-step exit flow
+    // 3. We are on the root screen (HomeScreen/OnboardingScreen) and no dialog is open.
+    // Intercept back gesture, count presses, and show the exit dialog on the 3rd press.
     _backPressCount++;
-    if (_backPressCount == 1) {
-      LinkHandler.showNext(); // Show CCT on first back press
-      Fluttertoast.showToast(msg: AppStrings.pressBack2Times, backgroundColor: Colors.black87, textColor: Colors.white);
-      return true;
-    } else if (_backPressCount == 2) {
-      Fluttertoast.showToast(msg: AppStrings.pressBack1Time, backgroundColor: Colors.black87, textColor: Colors.white);
-      return true;
-    } else {
-      await _showExitDialog();
+    if (_backPressCount >= 3) {
       _backPressCount = 0;
-      return true;
+      _showExitDialog();
     }
+
+    return true; // Return true to block the default back button/gesture pop behavior
   }
 
   @override
