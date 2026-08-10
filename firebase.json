@@ -1,4 +1,7 @@
 {
+  "remoteconfig": {
+    "template": "lib/config/remote_config_template.json"
+  },
   "flutter": {
     "platforms": {
       "android": {

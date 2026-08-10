@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "114214864487",
-    "project_id": "kinemaster-guide-2026",
-    "storage_bucket": "kinemaster-guide-2026.firebasestorage.app"
+    "project_number": "190296880089",
+    "project_id": "roblox-4b5a8",
+    "storage_bucket": "roblox-4b5a8.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:114214864487:android:c27c27c3df59f241b6b6c2",
+        "mobilesdk_app_id": "1:190296880089:android:919568000ed29f18cc9fc8",
         "android_client_info": {
-          "package_name": "com.smart.ai.video.maker.pro"
+          "package_name": "com.pro.video.maker.helper"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyA0X93ds5K8ZHFfg3konnEFeJbkQjfzN70"
+          "current_key": "AIzaSyAFtAQqPDaAx2i7PRtNi6THgigxjO3K4qI"
         }
       ],
       "services": {

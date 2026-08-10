@@ -1,4 +1,4 @@
-package com.smart.ai.video.maker.pro
+package com.pro.video.maker.helper
 
 import io.flutter.embedding.android.FlutterActivity
 
