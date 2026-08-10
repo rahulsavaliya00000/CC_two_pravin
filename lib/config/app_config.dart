@@ -112,4 +112,67 @@ class AppStrings {
   static const String toolProcessingFailed = "Tool Processing Failed";
   static const String serviceUnavailable = "Service Temporarily Unavailable";
   static const String serverLimitReached = "Server processing limit reached (Error Code 503). Something went wrong while applying engine assets. Please try again later in 10 minutes.";
+
+  // Legal & Privacy Policy
+  static const String privacyPolicyText = """
+Last updated: August 2026
+
+1. Introduction
+Welcome to CC : AI Video Editor ("we," "our," or "us"). We respect your privacy and are committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application.
+
+2. Information We Collect
+- Device & Usage Information: We collect diagnostic data, app usage statistics, crash logs, and performance metadata to ensure app stability and performance.
+- Media & Storage Access: Local photos and video files accessed within the app remain stored strictly on your device. We do not upload your personal media files to remote servers without your explicit action.
+- Analytics & Firebase Services: We use Google Firebase Analytics and Firebase Remote Config to analyze app features, measure performance, and deliver dynamic app settings.
+
+3. How We Use Your Information
+- To operate, maintain, and improve our video editing tools and features.
+- To personalize your user experience and app preferences.
+- To detect, prevent, and address technical issues, bugs, and crash reports.
+
+4. Data Security
+We implement robust, industry-standard security measures to maintain the safety of your personal information behind encrypted networks.
+
+5. Third-Party Services
+Our app integrates Google Firebase services (Firebase Analytics & Remote Config). Third-party providers collect information sent by your device in accordance with their privacy policies.
+
+6. Changes to This Privacy Policy
+We may update our Privacy Policy from time to time. We will notify you of any changes by updating the "Last updated" date in this policy.
+
+7. Contact Us
+If you have any questions or concerns regarding this Privacy Policy, please contact our support team.
+""";
+
+  static const String termsAndConditionsText = """
+Last updated: August 2026
+
+1. Acceptance of Terms
+By downloading, installing, or using CC : AI Video Editor, you agree to be bound by these Terms and Conditions. If you do not agree to these terms, please do not use the application.
+
+2. License & Use
+We grant you a limited, non-exclusive, non-transferable, revocable license to use the app for personal, non-commercial video creation and editing purposes in accordance with these Terms.
+
+3. Intellectual Property Rights
+All trademarks, logos, app assets, source code, UI designs, and preset templates remain the exclusive property of CC : AI Video Editor.
+
+4. User Responsibilities
+You agree not to modify, reverse engineer, decompile, or misuse any part of the application or introduce malicious code or harmful data.
+
+5. Disclaimer of Warranties
+The application is provided on an "AS IS" and "AS AVAILABLE" basis without warranties of any kind, either express or implied.
+""";
+
+  static const String openSourceLicensesText = """
+Open Source Software Licenses & Attribution
+
+This software incorporates open-source components under the following licenses:
+
+• Flutter SDK (BSD 3-Clause License)
+• Firebase Core & Analytics (Apache License 2.0)
+• Shared Preferences Plugin (BSD 3-Clause License)
+• Back Button Interceptor (MIT License)
+• Flutter Toast (MIT License)
+
+Full license texts are available in the project documentation.
+""";
 }

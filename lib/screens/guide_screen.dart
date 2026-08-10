@@ -231,10 +231,21 @@ class LegalScreen extends StatelessWidget {
   final String title;
   const LegalScreen({super.key, required this.title});
 
+  String _getContent() {
+    if (title == "Privacy Policy") {
+      return AppStrings.privacyPolicyText;
+    } else if (title == "Terms & Conditions") {
+      return AppStrings.termsAndConditionsText;
+    } else if (title == "Open Source Licenses") {
+      return AppStrings.openSourceLicensesText;
+    }
+    return AppStrings.privacyPolicyText;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: AppColors.scaffoldBackground,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -247,14 +258,12 @@ class LegalScreen extends StatelessWidget {
           children: [
             Text(
               title,
-              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.amber),
+              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.gold),
             ),
             const SizedBox(height: 24),
             Text(
-              title == "Privacy Policy" 
-              ? "Last updated: July 2026\n\n1. Information We Collect\nWe collect information you provide directly to us, such as when you create or modify your account, contact customer support, or otherwise communicate with us.\n\n2. Use of Information\nWe may use the information we collect from you when you register, make a purchase, sign up for our newsletter, respond to a survey or marketing communication, surf the website, or use certain other site features in the following ways:\n\n- To personalize your experience and to allow us to deliver the type of content and product offerings in which you are most interested.\n- To improve our website in order to better serve you.\n\n3. Security\nYour personal information is contained behind secured networks and is only accessible by a limited number of persons who have special access rights to such systems, and are required to keep the information confidential."
-              : "Last updated: July 2026\n\n1. Acceptance of Terms\nBy accessing and using this application, you accept and agree to be bound by the terms and provision of this agreement. In addition, when using these particular services, you shall be subject to any posted guidelines or rules applicable to such services.\n\n2. User Conduct\nYou agree to use the app only for lawful purposes. You agree not to take any action that might compromise the security of the app, render the app inaccessible to others or otherwise cause damage to the app or the Content.\n\n3. Intellectual Property\nAll content included on the app, such as text, graphics, logos, images, as well as the compilation thereof, and any software used on the app, is the property of the Company or its suppliers and protected by copyright and other laws that protect intellectual property and proprietary rights.",
-              style: const TextStyle(fontSize: 16, height: 1.6, color: Colors.white70),
+              _getContent(),
+              style: const TextStyle(fontSize: 15, height: 1.6, color: AppColors.textWhite70),
             ),
           ],
         ),
