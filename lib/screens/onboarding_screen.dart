@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'home_screen.dart';
+import '../config/app_config.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -23,7 +24,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _restoreSavedPage() async {
     final prefs = await SharedPreferences.getInstance();
     int savedPage = prefs.getInt('onboarding_current_page') ?? 0;
-    if (savedPage > 0 && savedPage < _onboardingData.length) {
+    if (savedPage > 0 && savedPage < AppStrings.onboardingItems.length) {
       if (mounted) {
         setState(() {
           _currentPage = savedPage;
@@ -39,53 +40,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     await prefs.setInt('onboarding_current_page', index);
   }
 
-  final List<Map<String, String>> _onboardingData = [
-    {
-      "title": "Unleash Your Creativity",
-      "desc": "The ultimate mobile video editor for professionals and beginners.",
-      "image": "assets/images/onboarding_1.png"
-    },
-    {
-      "title": "Manage Your Media",
-      "desc": "Import 4K clips, photos, and audio effortlessly.",
-      "image": "assets/images/onboarding_2.png"
-    },
-    {
-      "title": "Precision Trimming",
-      "desc": "Cut, split, and arrange clips with frame-by-frame accuracy on the timeline.",
-      "image": "assets/images/onboarding_3.png"
-    },
-    {
-      "title": "Stunning Visuals",
-      "desc": "Apply cinematic filters, color grading, and dynamic effects.",
-      "image": "assets/images/onboarding_4.png"
-    },
-    {
-      "title": "Perfect Soundscapes",
-      "desc": "Mix multi-track audio, add voiceovers, and sync beats.",
-      "image": "assets/images/onboarding_5.png"
-    },
-    {
-      "title": "Share with the World",
-      "desc": "Export in high resolution without watermarks.",
-      "image": "assets/images/onboarding_6.png"
-    },
-  ];
-
   void _finishOnboarding() async {
-    final List<String> loadingSteps = [
-      "Initializing app assets...",
-      "Preparing canvas frames...",
-      "Initializing engine...",
-      "Loading preset templates...",
-      "Configuring timeline tracks...",
-      "Loading color profiles...",
-      "Initializing visual effects...",
-      "Setting up editing studio...",
-      "Finalizing asset initialization...",
-      "Launching studio environment...",
-    ];
-
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -96,15 +51,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           builder: (context, snapshot) {
             int progress = snapshot.data ?? 0;
             // Which step label to show (changes every ~1 second = every 10 ticks)
-            int stepIndex = ((progress / 100) * loadingSteps.length).floor().clamp(0, loadingSteps.length - 1);
-            String currentStep = loadingSteps[stepIndex];
+            int stepIndex = ((progress / 100) * AppStrings.onboardingLoadingSteps.length).floor().clamp(0, AppStrings.onboardingLoadingSteps.length - 1);
+            String currentStep = AppStrings.onboardingLoadingSteps[stepIndex];
 
             return AlertDialog(
-              backgroundColor: const Color(0xFF1E1E1E),
+              backgroundColor: AppColors.cardBackground,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               title: const Text(
-                "Initializing Assets...",
-                style: TextStyle(color: Color(0xFF00E5FF), fontWeight: FontWeight.bold),
+                AppStrings.onboardingInitTitle,
+                style: TextStyle(color: AppColors.primaryCyan, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               content: Column(
@@ -115,7 +70,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: Text(
                       currentStep,
                       key: ValueKey(currentStep),
-                      style: const TextStyle(color: Colors.white70, fontSize: 13),
+                      style: const TextStyle(color: AppColors.textWhite70, fontSize: 13),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -126,11 +81,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       value: progress / 100.0,
                       minHeight: 12,
                       backgroundColor: Colors.white24,
-                      color: const Color(0xFF00E5FF),
+                      color: AppColors.primaryCyan,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text("$progress%", style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                  Text("$progress%", style: const TextStyle(color: AppColors.textWhite54, fontSize: 12)),
                 ],
               ),
             );
@@ -156,15 +111,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.scaffoldBackground,
       body: Stack(
         children: [
           PageView.builder(
             physics: const NeverScrollableScrollPhysics(),
             controller: _pageController,
             onPageChanged: _onPageChanged,
-            itemCount: _onboardingData.length,
+            itemCount: AppStrings.onboardingItems.length,
             itemBuilder: (context, index) {
-              final data = _onboardingData[index];
+              final data = AppStrings.onboardingItems[index];
               return Column(
                 children: [
                   Expanded(
@@ -188,13 +144,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         children: [
                           Text(
                             data['title']!,
-                            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+                            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.textWhite),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 16),
                           Text(
                             data['desc']!,
-                            style: const TextStyle(fontSize: 16, color: Colors.white70, height: 1.5),
+                            style: const TextStyle(fontSize: 16, color: AppColors.textWhite70, height: 1.5),
                             textAlign: TextAlign.center,
                           ),
                         ],
@@ -216,14 +172,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 // Dots indicator
                 Row(
                   children: List.generate(
-                    _onboardingData.length,
+                    AppStrings.onboardingItems.length,
                     (index) => AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
                       margin: const EdgeInsets.only(right: 8),
                       height: 8,
                       width: _currentPage == index ? 24 : 8,
                       decoration: BoxDecoration(
-                        color: _currentPage == index ? const Color(0xFF00E5FF) : Colors.white38,
+                        color: _currentPage == index ? AppColors.primaryCyan : Colors.white38,
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
@@ -233,19 +189,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 // Next/Start Button
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
+                    backgroundColor: AppColors.buttonWhite,
+                    foregroundColor: AppColors.buttonBlack,
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                   ),
                   onPressed: () {
-                    if (_currentPage == _onboardingData.length - 1) {
+                    if (_currentPage == AppStrings.onboardingItems.length - 1) {
                       _finishOnboarding();
                     } else {
                       _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
                     }
                   },
-                  child: Text(_currentPage == _onboardingData.length - 1 ? "Start Editing" : "Next", style: const TextStyle(fontWeight: FontWeight.bold)),
+                  child: Text(_currentPage == AppStrings.onboardingItems.length - 1 ? AppStrings.startEditing : AppStrings.next, style: const TextStyle(fontWeight: FontWeight.bold)),
                 )
               ],
             ),

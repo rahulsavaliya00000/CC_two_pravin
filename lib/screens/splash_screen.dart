@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'onboarding_screen.dart';
 import '../link_handler.dart';
+import '../config/app_config.dart';
 
 class SplashScreen extends StatefulWidget {
   final bool hasSeenOnboarding;
@@ -50,7 +51,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: AppColors.scaffoldBackground,
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -71,21 +72,21 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 const FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
-                    "CC : AI Video Editor",
+                    AppStrings.appTitle,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: AppColors.textWhite,
                     ),
                   ),
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  "Initializing core assets...",
+                  AppStrings.splashInitializing,
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.white54,
+                    color: AppColors.textWhite54,
                   ),
                 ),
                 const SizedBox(height: 40),
@@ -95,14 +96,14 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     value: _controller.value,
                     minHeight: 8,
                     backgroundColor: Colors.white24,
-                    color: const Color(0xFF00E5FF),
+                    color: AppColors.primaryCyan,
                   ),
                 ),
                 const SizedBox(height: 10),
                 Text(
                   "${(_controller.value * 100).toInt()}%",
                   style: const TextStyle(
-                    color: Color(0xFF00E5FF),
+                    color: AppColors.primaryCyan,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

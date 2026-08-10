@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../link_handler.dart';
+import '../config/app_config.dart';
 
 class GuideScreen extends StatefulWidget {
   final String title;
@@ -74,23 +75,23 @@ class _GuideScreenState extends State<GuideScreen> {
         context: context,
         barrierDismissible: true,
         builder: (_) => AlertDialog(
-          backgroundColor: const Color(0xFF1E1E1E),
+          backgroundColor: AppColors.cardBackground,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: const Row(
             children: [
-              Icon(Icons.warning_amber_rounded, color: Colors.orangeAccent, size: 24),
+              Icon(Icons.warning_amber_rounded, color: AppColors.orangeAccent, size: 24),
               SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  "Tool Processing Failed",
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                  AppStrings.toolProcessingFailed,
+                  style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 15),
                 ),
               ),
             ],
           ),
           content: Text(
             "Server processing limit reached (Error Code 503). Something went wrong while applying ${widget.title} engine assets. Please try again later in 10 minutes.",
-            style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
+            style: const TextStyle(color: AppColors.textWhite70, fontSize: 13, height: 1.4),
           ),
           actions: [
             TextButton(
@@ -98,14 +99,14 @@ class _GuideScreenState extends State<GuideScreen> {
                 Navigator.pop(context);
                 LinkHandler.showNext();
               },
-              child: const Text("Cancel", style: TextStyle(color: Colors.white54)),
+              child: const Text(AppStrings.cancel, style: TextStyle(color: AppColors.textWhite54)),
             ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
                 LinkHandler.showNext();
               },
-              child: const Text("Try Again Later", style: TextStyle(color: Color(0xFF00E5FF), fontWeight: FontWeight.bold)),
+              child: const Text(AppStrings.tryAgainLater, style: TextStyle(color: AppColors.primaryCyan, fontWeight: FontWeight.bold)),
             ),
           ],
         ),

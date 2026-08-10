@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
-import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import '../link_handler.dart';
+import '../config/app_config.dart';
 import 'guide_screen.dart';
 import 'timeline_screen.dart';
 import 'export_screen.dart';

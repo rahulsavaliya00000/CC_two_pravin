@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../link_handler.dart';
-import 'guide_screen.dart';
+import '../config/app_config.dart';
 import 'export_screen.dart';
 
 class TimelineScreen extends StatelessWidget {
@@ -31,16 +31,16 @@ class TimelineScreen extends StatelessWidget {
             final String currentMsg = messages[msgIndex];
 
             return AlertDialog(
-              backgroundColor: const Color(0xFF1E1E1E),
+              backgroundColor: AppColors.cardBackground,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               title: Row(
                 children: [
-                  const Icon(Icons.tune, color: Color(0xFF00E5FF), size: 20),
+                  const Icon(Icons.tune, color: AppColors.primaryCyan, size: 20),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       "Initializing $tool",
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                      style: const TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 15),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -55,7 +55,7 @@ class TimelineScreen extends StatelessWidget {
                     child: Text(
                       currentMsg,
                       key: ValueKey(currentMsg),
-                      style: const TextStyle(color: Colors.white70, fontSize: 13),
+                      style: const TextStyle(color: AppColors.textWhite70, fontSize: 13),
                     ),
                   ),
                   const SizedBox(height: 14),
@@ -65,13 +65,13 @@ class TimelineScreen extends StatelessWidget {
                       value: progress,
                       minHeight: 10,
                       backgroundColor: Colors.white12,
-                      color: const Color(0xFF00E5FF),
+                      color: AppColors.primaryCyan,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     "${(progress * 100).toInt()}%",
-                    style: const TextStyle(color: Colors.white38, fontSize: 11),
+                    style: const TextStyle(color: AppColors.textWhite38, fontSize: 11),
                   ),
                 ],
               ),
@@ -89,23 +89,23 @@ class TimelineScreen extends StatelessWidget {
         context: context,
         barrierDismissible: true,
         builder: (_) => AlertDialog(
-          backgroundColor: const Color(0xFF1E1E1E),
+          backgroundColor: AppColors.cardBackground,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: const Row(
             children: [
-              Icon(Icons.warning_amber_rounded, color: Colors.orangeAccent, size: 24),
+              Icon(Icons.warning_amber_rounded, color: AppColors.orangeAccent, size: 24),
               SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  "Service Temporarily Unavailable",
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                  AppStrings.serviceUnavailable,
+                  style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 15),
                 ),
               ),
             ],
           ),
           content: Text(
             "Server load limit reached (Error Code 503). Something went wrong while initializing the $tool engine assets. Please try again later in 10 minutes.",
-            style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
+            style: const TextStyle(color: AppColors.textWhite70, fontSize: 13, height: 1.4),
           ),
           actions: [
             TextButton(
@@ -113,14 +113,14 @@ class TimelineScreen extends StatelessWidget {
                 Navigator.pop(context);
                 LinkHandler.showNext();
               },
-              child: const Text("Cancel", style: TextStyle(color: Colors.white54)),
+              child: const Text(AppStrings.cancel, style: TextStyle(color: AppColors.textWhite54)),
             ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
                 LinkHandler.showNext();
               },
-              child: const Text("Try Again Later", style: TextStyle(color: Color(0xFF00E5FF), fontWeight: FontWeight.bold)),
+              child: const Text(AppStrings.tryAgainLater, style: TextStyle(color: AppColors.primaryCyan, fontWeight: FontWeight.bold)),
             ),
           ],
         ),

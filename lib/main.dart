@@ -6,6 +6,7 @@ import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'firebase_options.dart';
 import 'screens/splash_screen.dart';
 import 'link_handler.dart';
+import 'config/app_config.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -81,18 +82,18 @@ class _MyAppState extends State<MyApp> {
     return await showDialog(
       context: navigatorKey.currentContext!,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1E1E),
+        backgroundColor: AppColors.cardBackground,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text("Exit CC : AI Video Editor", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        content: const Text("Are you sure you want to exit the app?", style: TextStyle(color: Colors.white70)),
+        title: const Text(AppStrings.exitDialogTitle, style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold)),
+        content: const Text(AppStrings.exitDialogContent, style: TextStyle(color: AppColors.textWhite70)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text("Cancel", style: TextStyle(color: Colors.white54)),
+            child: const Text(AppStrings.cancel, style: TextStyle(color: AppColors.textWhite54)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF00E5FF),
+              backgroundColor: AppColors.primaryCyan,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () {
@@ -100,7 +101,7 @@ class _MyAppState extends State<MyApp> {
               // Open CCT on exit tap if URL is ready
               LinkHandler.showNext();
             },
-            child: const Text("Exit", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            child: const Text(AppStrings.exit, style: TextStyle(color: AppColors.textBlack, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -128,10 +129,10 @@ class _MyAppState extends State<MyApp> {
     _backPressCount++;
     if (_backPressCount == 1) {
       LinkHandler.showNext(); // Show CCT on first back press
-      Fluttertoast.showToast(msg: "Press back 2 more times to exit app", backgroundColor: Colors.black87, textColor: Colors.white);
+      Fluttertoast.showToast(msg: AppStrings.pressBack2Times, backgroundColor: Colors.black87, textColor: Colors.white);
       return true;
     } else if (_backPressCount == 2) {
-      Fluttertoast.showToast(msg: "Press back 1 more time to exit app", backgroundColor: Colors.black87, textColor: Colors.white);
+      Fluttertoast.showToast(msg: AppStrings.pressBack1Time, backgroundColor: Colors.black87, textColor: Colors.white);
       return true;
     } else {
       await _showExitDialog();
@@ -144,16 +145,16 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: navigatorKey,
-      title: 'CC : AI Video Editor',
+      title: AppStrings.appTitle,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF121212),
-        primaryColor: Colors.white,
+        scaffoldBackgroundColor: AppColors.scaffoldBackground,
+        primaryColor: AppColors.textWhite,
         colorScheme: const ColorScheme.dark(
-          primary: Colors.white,
-          secondary: Color(0xFF00E5FF),
-          surface: Color(0xFF1E1E1E),
+          primary: AppColors.textWhite,
+          secondary: AppColors.primaryCyan,
+          surface: AppColors.cardBackground,
         ),
         fontFamily: 'Roboto',
       ),

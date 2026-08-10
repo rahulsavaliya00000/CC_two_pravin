@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/app_config.dart';
 
 class ExportScreen extends StatefulWidget {
   const ExportScreen({super.key});
@@ -44,13 +45,13 @@ class _ExportScreenState extends State<ExportScreen> {
           builder: (context, snapshot) {
             int progress = snapshot.data ?? 0;
             return AlertDialog(
-              backgroundColor: const Color(0xFF1E1E1E),
+              backgroundColor: AppColors.cardBackground,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              title: const Text("Rendering & Initializing Export...", style: TextStyle(color: Color(0xFF00E5FF), fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+              title: const Text(AppStrings.renderingExport, style: TextStyle(color: AppColors.primaryCyan, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text("Initializing asset rendering. Please keep screen active.", style: TextStyle(color: Colors.white70), textAlign: TextAlign.center),
+                  const Text(AppStrings.exportKeepScreenActive, style: TextStyle(color: AppColors.textWhite70), textAlign: TextAlign.center),
                   const SizedBox(height: 24),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
@@ -58,11 +59,11 @@ class _ExportScreenState extends State<ExportScreen> {
                       value: progress / 100.0,
                       minHeight: 12,
                       backgroundColor: Colors.white24,
-                      color: const Color(0xFF00E5FF),
+                      color: AppColors.primaryCyan,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text("$progress%", style: const TextStyle(color: Colors.white54)),
+                  Text("$progress%", style: const TextStyle(color: AppColors.textWhite54)),
                 ],
               ),
             );
@@ -81,14 +82,14 @@ class _ExportScreenState extends State<ExportScreen> {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          backgroundColor: const Color(0xFF1E1E1E),
+          backgroundColor: AppColors.cardBackground,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text("Export Failed", style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
-          content: const Text("Error Code 402 (Device Codec Unsupported). Please try exporting at a lower resolution or clear device storage.", style: TextStyle(color: Colors.white70, height: 1.5)),
+          title: const Text(AppStrings.exportFailedTitle, style: TextStyle(color: AppColors.errorRed, fontWeight: FontWeight.bold)),
+          content: const Text(AppStrings.exportFailedContent, style: TextStyle(color: AppColors.textWhite70, height: 1.5)),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text("OK", style: TextStyle(color: Color(0xFF00E5FF))),
+              child: const Text(AppStrings.ok, style: TextStyle(color: AppColors.primaryCyan)),
             )
           ],
         ),
