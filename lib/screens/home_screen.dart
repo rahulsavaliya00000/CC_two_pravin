@@ -158,14 +158,12 @@ class _HomeScreenState extends State<HomeScreen> {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                LinkHandler.showNext();
               },
               child: const Text("Cancel", style: TextStyle(color: Colors.white54)),
             ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                LinkHandler.showNext();
               },
               child: const Text("Try Again Later", style: TextStyle(color: AppColors.primaryCyan, fontWeight: FontWeight.bold)),
             ),
