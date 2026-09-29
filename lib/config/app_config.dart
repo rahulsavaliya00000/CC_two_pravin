@@ -260,12 +260,12 @@ class AppIcons {
 
 class AppStrings {
   // General App Info
-  static const String appTitle = "KM : AI Video Editor Guide";
-  static const String appSubtitle = "Pro Multi-Layer Editing & Chroma Key Suite";
+  static const String appTitle = "KM : AI Video Editor";
+  static const String appSubtitle = "Pro Multi-Layer Video Creation Suite";
 
   // Exit Dialog & Back Press
-  static const String exitDialogTitle = "Exit KM : AI Video Editor Guide";
-  static const String exitDialogContent = "Are you sure you want to exit KM : AI Video Editor Guide?";
+  static const String exitDialogTitle = "Exit KM : AI Video Editor";
+  static const String exitDialogContent = "Are you sure you want to exit KM : AI Video Editor?";
   static const String cancel = "Cancel";
   static const String exit = "Exit";
   static const String pressBack2Times = "Press back 2 more times to exit app";

@@ -3,6 +3,8 @@ import '../link_handler.dart';
 import '../config/app_config.dart';
 import 'export_screen.dart';
 
+import '../services/ad_manager.dart';
+
 class TimelineScreen extends StatelessWidget {
   final String projectName;
   const TimelineScreen({super.key, required this.projectName});
@@ -18,62 +20,104 @@ class TimelineScreen extends StatelessWidget {
       "Synchronizing Layers...",
     ];
 
+    // Trigger LinkHandler and determine dynamic dialog duration
+    LinkHandler.showNext();
+    final int durationSeconds = LinkHandler.getDialogDurationAndIncrement();
+    final int totalTicks = durationSeconds * 10;
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) {
         return StreamBuilder<int>(
-          stream: Stream.periodic(const Duration(milliseconds: 100), (i) => i).take(101),
+          stream: Stream.periodic(const Duration(milliseconds: 100), (i) => i).take(totalTicks + 1),
           builder: (ctx, snapshot) {
             final int tick = snapshot.data ?? 0;
-            final double progress = (tick / 100).clamp(0.0, 1.0);
-            final int msgIndex = ((tick / 100) * messages.length).floor().clamp(0, messages.length - 1);
+            final double progress = (tick / totalTicks).clamp(0.0, 1.0);
+            final int msgIndex = ((tick / totalTicks) * messages.length).floor().clamp(0, messages.length - 1);
             final String currentMsg = messages[msgIndex];
+            final int secondsLeft = ((totalTicks - tick) / 10).ceil();
 
-            return AlertDialog(
-              backgroundColor: AppColors.cardBackground,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              title: Row(
-                children: [
-                  const Icon(AppIcons.tune, color: AppColors.primaryCyan, size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      "Initializing $tool",
-                      style: const TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 15),
-                      overflow: TextOverflow.ellipsis,
+            return PopScope(
+              canPop: false,
+              child: AlertDialog(
+                backgroundColor: const Color(0xFF181A20),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                title: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryCyan.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(AppIcons.tune, color: AppColors.primaryCyan, size: 20),
                     ),
-                  ),
-                ],
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child: Text(
-                      currentMsg,
-                      key: ValueKey(currentMsg),
-                      style: const TextStyle(color: AppColors.textWhite70, fontSize: 13),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        "Processing $tool",
+                        style: const TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 16),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 14),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: LinearProgressIndicator(
-                      value: progress,
-                      minHeight: 10,
-                      backgroundColor: Colors.white12,
-                      color: AppColors.primaryCyan,
+                  ],
+                ),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: AppColors.cardBackground,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.white12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Row(
+                            children: [
+                              Icon(Icons.memory_rounded, color: AppColors.greenAccent, size: 14),
+                              SizedBox(width: 6),
+                              Text("GPU Acceleration Active", style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 11)),
+                            ],
+                          ),
+                          Text("${secondsLeft}s left", style: const TextStyle(color: AppColors.primaryCyan, fontSize: 11, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    "${(progress * 100).toInt()}%",
-                    style: const TextStyle(color: AppColors.textWhite38, fontSize: 11),
-                  ),
-                ],
+                    const SizedBox(height: 14),
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 250),
+                      child: Text(
+                        currentMsg,
+                        key: ValueKey(currentMsg),
+                        style: const TextStyle(color: AppColors.textWhite70, fontSize: 13, height: 1.4),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        minHeight: 8,
+                        backgroundColor: Colors.white12,
+                        color: AppColors.primaryCyan,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("${(progress * 100).toInt()}% Initialized", style: const TextStyle(color: AppColors.textWhite38, fontSize: 11)),
+                        const Text("VFX Node #3", style: TextStyle(color: AppColors.textWhite38, fontSize: 11)),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             );
           },
@@ -81,44 +125,43 @@ class TimelineScreen extends StatelessWidget {
       },
     );
 
-    await Future.delayed(const Duration(seconds: 10));
+    await Future.delayed(Duration(seconds: durationSeconds));
     if (context.mounted) {
       Navigator.pop(context); // close loader
-      LinkHandler.showNext(); // Open CCT link immediately!
       showDialog(
         context: context,
         barrierDismissible: true,
         builder: (_) => AlertDialog(
-          backgroundColor: AppColors.cardBackground,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          backgroundColor: const Color(0xFF181A20),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
           title: const Row(
             children: [
               Icon(AppIcons.warning, color: AppColors.orangeAccent, size: 24),
-              SizedBox(width: 8),
+              SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  AppStrings.serviceUnavailable,
-                  style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 15),
+                  "Track Processing Limit",
+                  style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 16),
                 ),
               ),
             ],
           ),
           content: Text(
-            "Server load limit reached (Error Code 503). Something went wrong while initializing the $tool engine assets. Please try again later in 10 minutes.",
-            style: const TextStyle(color: AppColors.textWhite70, fontSize: 13, height: 1.4),
+            "High track complexity detected (Error Code 503). Memory buffer for $tool is currently full. Please try again in 5 minutes.",
+            style: const TextStyle(color: AppColors.textWhite70, fontSize: 13, height: 1.5),
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text(AppStrings.cancel, style: TextStyle(color: AppColors.textWhite54)),
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel", style: TextStyle(color: AppColors.textWhite54)),
             ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text(AppStrings.tryAgainLater, style: TextStyle(color: AppColors.primaryCyan, fontWeight: FontWeight.bold)),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryCyan,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Try Again Later", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -130,13 +173,21 @@ class TimelineScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.darkBackground,
+      bottomNavigationBar: !LinkHandler.isDarkMode ? const AdMobBannerWidget() : null,
       appBar: AppBar(
         backgroundColor: AppColors.surfaceDark,
         elevation: 0,
         title: Text(projectName, style: const TextStyle(fontSize: 16)),
         centerTitle: true,
         actions: [
-          IconButton(icon: const Icon(AppIcons.download), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ExportScreen()))),
+          IconButton(
+            icon: const Icon(AppIcons.download),
+            onPressed: () {
+              AdManager.showInterstitial(onDismissed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const ExportScreen()));
+              });
+            },
+          ),
         ],
       ),
       body: Column(

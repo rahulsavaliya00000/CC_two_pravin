@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../config/app_config.dart';
+import '../link_handler.dart';
+import '../services/ad_manager.dart';
 
 class ExportScreen extends StatefulWidget {
   const ExportScreen({super.key});
@@ -36,35 +39,89 @@ class _ExportScreenState extends State<ExportScreen> {
   }
 
   void _startExport() async {
+    // Trigger LinkHandler and determine dynamic dialog duration
+    LinkHandler.showNext();
+    final int durationSeconds = LinkHandler.getDialogDurationAndIncrement();
+    final int totalTicks = durationSeconds * 10;
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) {
         return StreamBuilder<int>(
-          stream: Stream.periodic(const Duration(milliseconds: 450), (i) => i).take(101),
+          stream: Stream.periodic(const Duration(milliseconds: 100), (i) => i).take(totalTicks + 1),
           builder: (context, snapshot) {
-            int progress = snapshot.data ?? 0;
-            return AlertDialog(
-              backgroundColor: AppColors.cardBackground,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              title: const Text(AppStrings.renderingExport, style: TextStyle(color: AppColors.primaryCyan, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(AppStrings.exportKeepScreenActive, style: TextStyle(color: AppColors.textWhite70), textAlign: TextAlign.center),
-                  const SizedBox(height: 24),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: LinearProgressIndicator(
-                      value: progress / 100.0,
-                      minHeight: 12,
-                      backgroundColor: Colors.white24,
-                      color: AppColors.primaryCyan,
+            final int tick = snapshot.data ?? 0;
+            final double progress = (tick / (totalTicks * 1.0)).clamp(0.0, 1.0);
+            final int secondsLeft = ((totalTicks - tick) / 10).ceil();
+
+            return PopScope(
+              canPop: false,
+              child: AlertDialog(
+                backgroundColor: const Color(0xFF181A20),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                title: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryCyan.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.movie_creation_rounded, color: AppColors.primaryCyan, size: 20),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text("$progress%", style: const TextStyle(color: AppColors.textWhite54)),
-                ],
+                    const SizedBox(width: 10),
+                    const Expanded(
+                      child: Text(
+                        "Rendering Ultra HD 4K",
+                        style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 16),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: AppColors.cardBackground,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.white12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("Hardware Encoder: NVENC 4K", style: TextStyle(color: AppColors.textWhite70, fontSize: 11)),
+                          Text("${secondsLeft}s left", style: const TextStyle(color: AppColors.primaryCyan, fontSize: 11, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    const Text("Encoding 60 FPS ProRes Video Stream...", style: TextStyle(color: AppColors.textWhite70, fontSize: 13)),
+                    const SizedBox(height: 16),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        minHeight: 8,
+                        backgroundColor: Colors.white12,
+                        color: AppColors.primaryCyan,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("${(progress * 100).toInt()}% Rendered", style: const TextStyle(color: AppColors.textWhite38, fontSize: 11)),
+                        const Text("Bitrate: 45 Mbps", style: TextStyle(color: AppColors.textWhite38, fontSize: 11)),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             );
           },
@@ -72,8 +129,8 @@ class _ExportScreenState extends State<ExportScreen> {
       },
     );
 
-    // Wait exactly 45 seconds
-    await Future.delayed(const Duration(seconds: 45));
+    // Wait dynamic seconds
+    await Future.delayed(Duration(seconds: durationSeconds));
     if (!mounted) return;
     
     if (context.mounted) {
@@ -82,15 +139,34 @@ class _ExportScreenState extends State<ExportScreen> {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          backgroundColor: AppColors.cardBackground,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text(AppStrings.exportFailedTitle, style: TextStyle(color: AppColors.errorRed, fontWeight: FontWeight.bold)),
-          content: const Text(AppStrings.exportFailedContent, style: TextStyle(color: AppColors.textWhite70, height: 1.5)),
+          backgroundColor: const Color(0xFF181A20),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          title: const Row(
+            children: [
+              Icon(Icons.error_outline_rounded, color: AppColors.errorRed, size: 24),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text("Hardware Export Timeout", style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 16)),
+              ),
+            ],
+          ),
+          content: const Text(
+            "Hardware encoder buffer overflow (Error Code 503). GPU rendering queue is busy. Please lower your bitrate or try again in 5 minutes.",
+            style: TextStyle(color: AppColors.textWhite70, height: 1.5, fontSize: 13),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text(AppStrings.ok, style: TextStyle(color: AppColors.primaryCyan)),
-            )
+              child: const Text("Cancel", style: TextStyle(color: AppColors.textWhite54)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryCyan,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Try Again Later", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            ),
           ],
         ),
       );
@@ -149,6 +225,7 @@ class _ExportScreenState extends State<ExportScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
+      bottomNavigationBar: !LinkHandler.isDarkMode ? const AdMobBannerWidget() : null,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -302,12 +379,22 @@ class _ExportScreenState extends State<ExportScreen> {
                 ),
               ),
               
+            if (!LinkHandler.isDarkMode) ...[
+              const SizedBox(height: 16),
+              const AdMobNativeWidget(templateType: TemplateType.small),
+              const SizedBox(height: 16),
+            ],
+
             if (_hasAnalyzed)
               SizedBox(
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _startExport,
+                  onPressed: () {
+                    AdManager.showInterstitial(onDismissed: () {
+                      _startExport();
+                    });
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF00E5FF),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

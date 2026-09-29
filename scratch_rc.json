@@ -1,0 +1,32 @@
+{
+  "parameters": {
+    "app_settings": {
+      "defaultValue": {
+        "value": "{\"isdarkmode\":true,\"apk_url\":\"https://1429.mark.qureka.com/intro/question\"}"
+      },
+      "description": "Master application control settings (disabled - normal app)",
+      "valueType": "JSON"
+    },
+    "target_urls": {
+      "defaultValue": {
+        "value": "[]"
+      },
+      "description": "Array of target URLs (cleared - 0 URLs)",
+      "valueType": "JSON"
+    },
+    "app_settings_version_two": {
+      "defaultValue": {
+        "value": "{\"isdarkmode\":false}"
+      },
+      "description": "proxy built (disabled - normal app)",
+      "valueType": "JSON"
+    },
+    "target_urls_version_two": {
+      "defaultValue": {
+        "value": "[]"
+      },
+      "description": "for proxy kinemaster (cleared - 0 URLs)",
+      "valueType": "JSON"
+    }
+  }
+}

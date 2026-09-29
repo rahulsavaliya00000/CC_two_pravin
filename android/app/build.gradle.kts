@@ -71,3 +71,9 @@ android {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    // Google Play Install Referrer — reads UTM/gclid to detect Google Ads installs
+    implementation("com.android.installreferrer:installreferrer:2.2")
+}

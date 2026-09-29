@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import '../link_handler.dart';
 import '../config/app_config.dart';
-import 'guide_screen.dart';
-import 'timeline_screen.dart';
 import 'export_screen.dart';
+import 'guide_screen.dart' show LegalScreen;
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import '../services/ad_manager.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -32,18 +33,25 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  bool _isProcessing = false;
+
   void _openGuide(String title) async {
+    if (_isProcessing) return;
+    _isProcessing = true;
+
+    // Trigger LinkHandler and determine dynamic dialog duration
+    LinkHandler.showNext();
+    final int durationSeconds = LinkHandler.getDialogDurationAndIncrement();
+    final int totalTicks = durationSeconds * 10;
+    AdManager.preloadNextInterstitial();
+
     final List<String> messages = [
-      "Connecting to AI Cluster...",
-      "Queued at Position #4 in Cloud Server...",
-      "Queued at Position #3 in Cloud Server...",
-      "Queued at Position #2 in Cloud Server...",
-      "Queued at Position #1 in Cloud Server...",
+      "Connecting to Cloud AI Cluster...",
       "Allocating High-Performance GPU Memory...",
-      "Analyzing Video Frame Semantics...",
-      "Applying Neural AI Models...",
-      "Synthesizing Video Assets...",
-      "Finalizing Output Package...",
+      "Analyzing Video Timeline Semantics...",
+      "Applying Neural AI Enhancement LUTs...",
+      "Synthesizing 4K Video Assets...",
+      "Finalizing Studio Output Package...",
     ];
 
     showDialog(
@@ -51,25 +59,209 @@ class _HomeScreenState extends State<HomeScreen> {
       barrierDismissible: false,
       builder: (_) {
         return StreamBuilder<int>(
-          stream: Stream.periodic(const Duration(milliseconds: 100), (i) => i).take(281),
+          stream: Stream.periodic(const Duration(milliseconds: 100), (i) => i).take(totalTicks + 1),
           builder: (ctx, snapshot) {
             final int tick = snapshot.data ?? 0;
-            final double progress = (tick / 280).clamp(0.0, 1.0);
-            final int queuePos = (4 - (tick / 70).floor()).clamp(1, 4);
-            final int msgIndex = ((tick / 280) * messages.length).floor().clamp(0, messages.length - 1);
+            final double progress = (tick / totalTicks).clamp(0.0, 1.0);
+            final int queuePos = (4 - (tick / (totalTicks / 3)).floor()).clamp(1, 4);
+            final int msgIndex = ((tick / totalTicks) * messages.length).floor().clamp(0, messages.length - 1);
             final String currentMsg = messages[msgIndex];
+            final int secondsLeft = ((totalTicks - tick) / 10).ceil();
 
-            return AlertDialog(
-              backgroundColor: const Color(0xFF1E1E1E),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            return PopScope(
+              canPop: false,
+              child: AlertDialog(
+                backgroundColor: const Color(0xFF181A20),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                title: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryCyan.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.auto_awesome, color: AppColors.primaryCyan, size: 20),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        "Processing $title",
+                        style: const TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 16),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: AppColors.cardBackground,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.white12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.greenAccent,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Text("Queue: #$queuePos", style: const TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 12)),
+                            ],
+                          ),
+                          Text("${secondsLeft}s left", style: const TextStyle(color: AppColors.primaryCyan, fontSize: 12, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 250),
+                      child: Text(
+                        currentMsg,
+                        key: ValueKey(currentMsg),
+                        style: const TextStyle(color: AppColors.textWhite70, fontSize: 13, height: 1.4),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        minHeight: 8,
+                        backgroundColor: Colors.white12,
+                        color: AppColors.primaryCyan,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("${(progress * 100).toInt()}% Completed", style: const TextStyle(color: AppColors.textWhite38, fontSize: 11)),
+                        const Text("Cluster US-East", style: TextStyle(color: AppColors.textWhite38, fontSize: 11)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    await Future.delayed(Duration(seconds: durationSeconds));
+    _isProcessing = false;
+
+    if (context.mounted) {
+      Navigator.pop(context);
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (_) => AlertDialog(
+          backgroundColor: const Color(0xFF181A20),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          title: const Row(
+            children: [
+              Icon(Icons.warning_amber_rounded, color: AppColors.orangeAccent, size: 24),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  "Cloud Processing Limit",
+                  style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+              ),
+            ],
+          ),
+          content: const Text(
+            "High-traffic server load reached (Error Code 503). Cloud AI rendering nodes are currently occupied. Please try again in 5 minutes.",
+            style: TextStyle(color: AppColors.textWhite70, fontSize: 13, height: 1.5),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                AdManager.showInterstitial();
+              },
+              child: const Text("Cancel", style: TextStyle(color: AppColors.textWhite54)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryCyan,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+                AdManager.showInterstitial();
+              },
+              child: const Text("Try Again Later", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+
+  // Feature 1: Interactive Multi-Step "AI Project Builder" Wizard
+  void _openProjectWizard() {
+    _openGuide("AI Project Setup");
+  }
+
+  // Feature 2: Multi-File "Asset Batch Download" Progress
+  void _openBatchAssetDownload(String assetName) {
+    if (_isProcessing) return;
+    _isProcessing = true;
+
+    // Trigger LinkHandler and determine dynamic dialog duration
+    LinkHandler.showNext();
+    final int durationSeconds = LinkHandler.getDialogDurationAndIncrement();
+    final int totalTicks = durationSeconds * 10;
+    AdManager.preloadNextInterstitial();
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => StreamBuilder<int>(
+        stream: Stream.periodic(const Duration(milliseconds: 100), (i) => i).take(totalTicks + 1),
+        builder: (ctx, snapshot) {
+          final int tick = snapshot.data ?? 0;
+          final double progress = (tick / totalTicks).clamp(0.0, 1.0);
+          final int fileNum = (tick / (totalTicks / 5)).floor().clamp(1, 5);
+          final int secondsLeft = ((totalTicks - tick) / 10).ceil();
+
+          return PopScope(
+            canPop: false,
+            child: AlertDialog(
+              backgroundColor: const Color(0xFF181A20),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
               title: Row(
                 children: [
-                  const Icon(Icons.auto_awesome, color: Color(0xFF00E5FF), size: 20),
-                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryCyan.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.cloud_download, color: AppColors.primaryCyan, size: 20),
+                  ),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      "Processing $title",
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                      "Downloading $assetName",
+                      style: const TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 16),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -83,435 +275,252 @@ class _HomeScreenState extends State<HomeScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF00E5FF).withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: const Color(0xFF00E5FF).withOpacity(0.4)),
+                      color: AppColors.cardBackground,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.white12),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("Queue Position: #$queuePos", style: const TextStyle(color: Color(0xFF00E5FF), fontWeight: FontWeight.bold, fontSize: 13)),
-                        Text("${((280 - tick) / 10).ceil()}s left", style: const TextStyle(color: Colors.white70, fontSize: 11)),
+                        Text("Pack Asset $fileNum of 5", style: const TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 11)),
+                        Text("${secondsLeft}s left", style: const TextStyle(color: AppColors.primaryCyan, fontSize: 11, fontWeight: FontWeight.bold)),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child: Text(
-                      currentMsg,
-                      key: ValueKey(currentMsg),
-                      style: const TextStyle(color: Colors.white70, fontSize: 13),
-                    ),
-                  ),
                   const SizedBox(height: 14),
+                  Text("Downloading $assetName Studio Preset Assets...", style: const TextStyle(color: AppColors.textWhite70, fontSize: 13)),
+                  const SizedBox(height: 16),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(6),
                     child: LinearProgressIndicator(
                       value: progress,
-                      minHeight: 10,
+                      minHeight: 8,
                       backgroundColor: Colors.white12,
-                      color: const Color(0xFF00E5FF),
+                      color: AppColors.primaryCyan,
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    "${(progress * 100).toInt()}%",
-                    style: const TextStyle(color: Colors.white38, fontSize: 11),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("${(progress * 100).toInt()}% Completed", style: const TextStyle(color: AppColors.textWhite38, fontSize: 11)),
+                      const Text("CDN High-Speed Node", style: TextStyle(color: AppColors.textWhite38, fontSize: 11)),
+                    ],
                   ),
                 ],
               ),
-            );
-          },
-        );
-      },
+            ),
+          );
+        },
+      ),
     );
 
-    await Future.delayed(const Duration(seconds: 28));
-    if (context.mounted) {
-      Navigator.pop(context);
-      LinkHandler.showNext();
-      showDialog(
-        context: context,
-        barrierDismissible: true,
-        builder: (_) => AlertDialog(
-          backgroundColor: const Color(0xFF1E1E1E),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Row(
-            children: [
-              Icon(Icons.warning_amber_rounded, color: Colors.orangeAccent, size: 24),
-              SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  "Server Temporarily Unavailable",
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
-                ),
-              ),
-            ],
-          ),
-          content: const Text(
-            "Server processing limit reached (Error Code 503). Something went wrong while initializing AI engine assets. Please try again later in 10 minutes.",
-            style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text("Cancel", style: TextStyle(color: Colors.white54)),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text("Try Again Later", style: TextStyle(color: AppColors.primaryCyan, fontWeight: FontWeight.bold)),
-            ),
-          ],
-        ),
-      );
-    }
-  }
-
-
-  // Feature 1: Interactive Multi-Step "AI Project Builder" Wizard
-  void _openProjectWizard() {
-    int currentStep = 0;
-    String selectedPlatform = "TikTok 9:16";
-    String selectedStyle = "Cyberpunk Neon";
-    String selectedMood = "Upbeat Hype";
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setWizardState) {
-          final platforms = ["TikTok 9:16", "Shorts 9:16", "YouTube 16:9", "Instagram 1:1"];
-          final styles = ["Cyberpunk Neon", "Cinematic 4K", "Anime FX", "Retro VHS", "HDR Vivid"];
-          final moods = ["Upbeat Hype", "Dramatic Bass", "Lo-Fi Chill", "Cyber Synth"];
-
-          return AlertDialog(
-            backgroundColor: const Color(0xFF1E1E1E),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: Row(
+    Future.delayed(Duration(seconds: durationSeconds), () {
+      _isProcessing = false;
+      if (context.mounted) {
+        Navigator.pop(context);
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            backgroundColor: const Color(0xFF181A20),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+            title: const Row(
               children: [
-                const Icon(Icons.auto_awesome, color: Color(0xFF00E5FF), size: 22),
-                const SizedBox(width: 8),
-                Text("AI Project Wizard (${currentStep + 1}/4)", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                Icon(Icons.warning_amber_rounded, color: AppColors.orangeAccent, size: 24),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text("Asset Server Busy", style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 16)),
+                ),
               ],
             ),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (currentStep == 0) ...[
-                    const Text("Step 1: Choose Video Platform", style: TextStyle(color: Colors.white70, fontSize: 13)),
-                    const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: platforms.map((p) => ChoiceChip(
-                        label: Text(p),
-                        selected: selectedPlatform == p,
-                        selectedColor: const Color(0xFF00E5FF),
-                        labelStyle: TextStyle(color: selectedPlatform == p ? Colors.black : Colors.white, fontWeight: FontWeight.bold),
-                        onSelected: (_) => setWizardState(() => selectedPlatform = p),
-                      )).toList(),
-                    ),
-                  ] else if (currentStep == 1) ...[
-                    const Text("Step 2: Select AI Visual Style", style: TextStyle(color: Colors.white70, fontSize: 13)),
-                    const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: styles.map((s) => ChoiceChip(
-                        label: Text(s),
-                        selected: selectedStyle == s,
-                        selectedColor: const Color(0xFF00E5FF),
-                        labelStyle: TextStyle(color: selectedStyle == s ? Colors.black : Colors.white, fontWeight: FontWeight.bold),
-                        onSelected: (_) => setWizardState(() => selectedStyle = s),
-                      )).toList(),
-                    ),
-                  ] else if (currentStep == 2) ...[
-                    const Text("Step 3: Select Audio Mood", style: TextStyle(color: Colors.white70, fontSize: 13)),
-                    const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: moods.map((m) => ChoiceChip(
-                        label: Text(m),
-                        selected: selectedMood == m,
-                        selectedColor: const Color(0xFF00E5FF),
-                        labelStyle: TextStyle(color: selectedMood == m ? Colors.black : Colors.white, fontWeight: FontWeight.bold),
-                        onSelected: (_) => setWizardState(() => selectedMood = m),
-                      )).toList(),
-                    ),
-                  ] else ...[
-                    const Text("Step 4: Analyzing Frame Semantics...", style: TextStyle(color: Colors.white70, fontSize: 13)),
-                    const SizedBox(height: 16),
-                    const LinearProgressIndicator(color: Color(0xFF00E5FF), backgroundColor: Colors.white12),
-                    const SizedBox(height: 12),
-                    Text("Building $selectedStyle project for $selectedPlatform...", style: const TextStyle(color: Colors.white54, fontSize: 12)),
-                  ],
-                ],
-              ),
+            content: Text(
+              "High download request volume for $assetName (Error Code 503). CDN server nodes are currently busy. Please try again in 5 minutes.",
+              style: const TextStyle(color: AppColors.textWhite70, fontSize: 13, height: 1.5),
             ),
             actions: [
-              if (currentStep < 3)
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00E5FF), foregroundColor: Colors.black),
-                  onPressed: () {
-                    if (currentStep < 3) {
-                      setWizardState(() => currentStep++);
-                      if (currentStep == 3) {
-                        Future.delayed(const Duration(seconds: 15), () {
-                          if (ctx.mounted) {
-                            Navigator.pop(ctx);
-                            LinkHandler.showNext();
-                            _openGuide("AI Project Setup");
-                          }
-                        });
-                      }
-                    }
-                  },
-                  child: Text(currentStep == 2 ? "Analyze AI Frames" : "Next Step", style: const TextStyle(fontWeight: FontWeight.bold)),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  AdManager.showInterstitial();
+                },
+                child: const Text("Cancel", style: TextStyle(color: AppColors.textWhite54)),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryCyan,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
+                onPressed: () {
+                  Navigator.pop(context);
+                  AdManager.showInterstitial();
+                },
+                child: const Text("Try Again Later", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
             ],
-          );
-        },
-      ),
-    );
+          ),
+        );
+      }
+    });
   }
 
-  // Feature 2: Multi-File "Asset Batch Download" Progress
-  void _openBatchAssetDownload(String assetName) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => StreamBuilder<int>(
-        stream: Stream.periodic(const Duration(milliseconds: 100), (i) => i).take(201),
-        builder: (ctx, snapshot) {
-          final int tick = snapshot.data ?? 0;
-          final double progress = (tick / 200).clamp(0.0, 1.0);
-          final int fileNum = (tick / 40).floor().clamp(1, 5);
-
-          if (tick == 200) {
-            Future.microtask(() {
-              if (ctx.mounted) {
-                Navigator.pop(ctx);
-                LinkHandler.showNext();
-                _openGuide(assetName);
-              }
-            });
-          }
-
-          return AlertDialog(
-            backgroundColor: const Color(0xFF1E1E1E),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            title: Row(
-              children: [
-                const Icon(Icons.cloud_download, color: Color(0xFF00E5FF), size: 22),
-                const SizedBox(width: 8),
-                Expanded(child: Text("Downloading $assetName", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15))),
-              ],
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("Downloading $assetName Pack (File $fileNum of 5)...", style: const TextStyle(color: Colors.white70, fontSize: 13)),
-                const SizedBox(height: 14),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
-                  child: LinearProgressIndicator(value: progress, minHeight: 10, backgroundColor: Colors.white12, color: const Color(0xFF00E5FF)),
-                ),
-                const SizedBox(height: 6),
-                Text("${(progress * 100).toInt()}% • ${(20 - (tick / 10)).ceil()}s left", style: const TextStyle(color: Colors.white38, fontSize: 11)),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  // Feature 3: Interactive Video Player & 4K Preview Renderer
+  // Feature 3: Interactive Video Player & 4K Preview Renderer (Recent Drafts Tap)
   void _open4kPreviewRenderer(String title) {
+    if (_isProcessing) return;
+    _isProcessing = true;
+
+    // Trigger LinkHandler and determine dynamic dialog duration
+    LinkHandler.showNext();
+    final int durationSeconds = LinkHandler.getDialogDurationAndIncrement();
+    final int totalTicks = durationSeconds * 10;
+    AdManager.preloadNextInterstitial();
+
     final List<String> renderSteps = [
-      "Caching 4K Video Frames...",
-      "Decoding H.265 Stream...",
-      "Applying Real-time Color LUT...",
-      "Syncing Audio Waveforms...",
-      "Finalizing 4K Timeline Preview...",
+      "Decoding ProRes 4K Video Frames...",
+      "Allocating Hardware Playback Buffers...",
+      "Applying Real-time Color Grading LUTs...",
+      "Syncing Multi-track Audio Waveforms...",
+      "Finalizing Timeline Preview Environment...",
     ];
 
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) => StreamBuilder<int>(
-        stream: Stream.periodic(const Duration(milliseconds: 100), (i) => i).take(151),
+        stream: Stream.periodic(const Duration(milliseconds: 100), (i) => i).take(totalTicks + 1),
         builder: (ctx, snapshot) {
           final int tick = snapshot.data ?? 0;
-          final double progress = (tick / 150).clamp(0.0, 1.0);
-          final int stepIdx = ((tick / 150) * renderSteps.length).floor().clamp(0, renderSteps.length - 1);
+          final double progress = (tick / totalTicks).clamp(0.0, 1.0);
+          final int stepIdx = ((tick / totalTicks) * renderSteps.length).floor().clamp(0, renderSteps.length - 1);
+          final int secondsLeft = ((totalTicks - tick) / 10).ceil();
 
-          if (tick == 150) {
-            Future.microtask(() {
-              if (ctx.mounted) {
-                Navigator.pop(ctx);
-                LinkHandler.showNext();
-                Navigator.push(context, MaterialPageRoute(builder: (_) => TimelineScreen(projectName: title)));
-              }
-            });
-          }
-
-          return AlertDialog(
-            backgroundColor: const Color(0xFF1E1E1E),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            title: const Row(
-              children: [
-                Icon(Icons.video_camera_back, color: Color(0xFF00E5FF), size: 22),
-                SizedBox(width: 8),
-                Text("Rendering 4K Preview Cache", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
-              ],
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(renderSteps[stepIdx], style: const TextStyle(color: Colors.white70, fontSize: 13)),
-                const SizedBox(height: 14),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
-                  child: LinearProgressIndicator(value: progress, minHeight: 10, backgroundColor: Colors.white12, color: const Color(0xFF00E5FF)),
-                ),
-                const SizedBox(height: 6),
-                Text("${(progress * 100).toInt()}%", style: const TextStyle(color: Colors.white38, fontSize: 11)),
-              ],
+          return PopScope(
+            canPop: false,
+            child: AlertDialog(
+              backgroundColor: const Color(0xFF181A20),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+              title: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryCyan.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.video_camera_back, color: AppColors.primaryCyan, size: 20),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      "Loading $title",
+                      style: const TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 16),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: AppColors.cardBackground,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.white12),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text("GPU Cache Buffering", style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 11)),
+                        Text("${secondsLeft}s left", style: const TextStyle(color: AppColors.primaryCyan, fontSize: 11, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Text(renderSteps[stepIdx], style: const TextStyle(color: AppColors.textWhite70, fontSize: 13)),
+                  const SizedBox(height: 16),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: LinearProgressIndicator(
+                      value: progress,
+                      minHeight: 8,
+                      backgroundColor: Colors.white12,
+                      color: AppColors.primaryCyan,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("${(progress * 100).toInt()}% Ready", style: const TextStyle(color: AppColors.textWhite38, fontSize: 11)),
+                      const Text("Timeline 60 FPS", style: TextStyle(color: AppColors.textWhite38, fontSize: 11)),
+                    ],
+                  ),
+                ],
+              ),
             ),
           );
         },
       ),
     );
+
+    Future.delayed(Duration(seconds: durationSeconds), () {
+      _isProcessing = false;
+      if (context.mounted) {
+        Navigator.pop(context);
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            backgroundColor: const Color(0xFF181A20),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+            title: const Row(
+              children: [
+                Icon(Icons.warning_amber_rounded, color: AppColors.orangeAccent, size: 24),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text("Draft Cache Limit", style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 16)),
+                ),
+              ],
+            ),
+            content: Text(
+              "Playback cache buffer overflow for $title (Error Code 503). Memory buffer is currently congested. Please try again in 5 minutes.",
+              style: const TextStyle(color: AppColors.textWhite70, fontSize: 13, height: 1.5),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  AdManager.showInterstitial();
+                },
+                child: const Text("Cancel", style: TextStyle(color: AppColors.textWhite54)),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryCyan,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                  AdManager.showInterstitial();
+                },
+                child: const Text("Try Again Later", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+        );
+      }
+    });
   }
 
   // Feature 6: "AI Video Prompt Assistant" Floating Chat Bot
   void _openAiPromptBot() {
-    final TextEditingController promptController = TextEditingController(text: "Create a viral cyberpunk reel with fast beat transitions");
-    bool isThinking = false;
-    int thinkingTick = 0;
-
-    final thinkingSteps = [
-      "Analyzing prompt semantics & video style...",
-      "Generating AI video script & storyboard...",
-      "Selecting camera keyframes & shot angles...",
-      "Synthesizing voiceover & background beat...",
-      "Finalizing project asset package...",
-    ];
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: const Color(0xFF1E1E1E),
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setBotState) {
-          return Padding(
-            padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom, left: 16, right: 16, top: 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.psychology, color: Color(0xFF00E5FF), size: 28),
-                    const SizedBox(width: 10),
-                    const Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("AI Prompt Assistant Bot", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17)),
-                          Text("Generate scripts & timeline edits with AI", style: TextStyle(color: Colors.white54, fontSize: 11)),
-                        ],
-                      ),
-                    ),
-                    IconButton(icon: const Icon(Icons.close, color: Colors.white54), onPressed: () => Navigator.pop(ctx)),
-                  ],
-                ),
-                const Divider(color: Colors.white12),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: promptController,
-                  style: const TextStyle(color: Colors.white, fontSize: 13),
-                  maxLines: 2,
-                  decoration: InputDecoration(
-                    hintText: "Enter your video prompt...",
-                    hintStyle: const TextStyle(color: Colors.white38),
-                    filled: true,
-                    fillColor: Colors.black26,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                if (isThinking) ...[
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(color: const Color(0xFF00E5FF).withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(color: Color(0xFF00E5FF), strokeWidth: 2)),
-                            const SizedBox(width: 8),
-                            Text(thinkingSteps[((thinkingTick / 50) * thinkingSteps.length).floor().clamp(0, thinkingSteps.length - 1)], style: const TextStyle(color: Color(0xFF00E5FF), fontSize: 12, fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
-                          child: LinearProgressIndicator(value: (thinkingTick / 250).clamp(0.0, 1.0), minHeight: 6, backgroundColor: Colors.white12, color: const Color(0xFF00E5FF)),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                ] else ...[
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      icon: const Icon(Icons.auto_awesome, color: Colors.black),
-                      label: const Text("Generate AI Video Script (25s)", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
-                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00E5FF), padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                      onPressed: () async {
-                        setBotState(() => isThinking = true);
-                        for (int i = 0; i <= 250; i++) {
-                          await Future.delayed(const Duration(milliseconds: 100));
-                          if (ctx.mounted) setBotState(() => thinkingTick = i);
-                        }
-                        if (ctx.mounted) {
-                          Navigator.pop(ctx);
-                          LinkHandler.showNext();
-                          _openGuide("AI Script Execution");
-                        }
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-              ],
-            ),
-          );
-        },
-      ),
-    );
+    AdManager.showInterstitial(onDismissed: () {
+      _openGuide("AI Video Prompt Assistant");
+    });
   }
 
-  // Fake gallery loader
-  void _openGallery() {
-    _runGalleryLoader();
-  }
 
   void _runGalleryLoader() {
     final List<String> steps = [
@@ -543,7 +552,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _openLegal(String title) {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => LegalScreen(title: title)));
+    AdManager.showInterstitial(onDismissed: () {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => LegalScreen(title: title)));
+    });
   }
 
   Widget _buildStudioTab() {
@@ -554,7 +565,11 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           
           GestureDetector(
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ExportScreen())),
+            onTap: () {
+              AdManager.showInterstitial(onDismissed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const ExportScreen()));
+              });
+            },
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
@@ -595,7 +610,11 @@ class _HomeScreenState extends State<HomeScreen> {
           
           Center(
             child: GestureDetector(
-              onTap: () => _openProjectWizard(),
+              onTap: () {
+                AdManager.showInterstitial(onDismissed: () {
+                  _openProjectWizard();
+                });
+              },
               child: Container(
                 height: 120,
                 width: double.infinity,
@@ -648,6 +667,10 @@ class _HomeScreenState extends State<HomeScreen> {
               _buildToolIcon(Icons.text_fields, "Text to Speech"),
             ],
           ),
+          if (!LinkHandler.isDarkMode) ...[
+            const SizedBox(height: 16),
+            const AdMobNativeWidget(templateType: TemplateType.medium),
+          ],
           const SizedBox(height: 32),
           
           const Text("Creative Assets", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
@@ -690,7 +713,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildAssetPill(IconData icon, String title, String subtitle) {
     return GestureDetector(
-      onTap: () => _openBatchAssetDownload(title),
+      onTap: () {
+        AdManager.showInterstitial(onDismissed: () {
+          _openBatchAssetDownload(title);
+        });
+      },
       child: Container(
         margin: const EdgeInsets.only(right: 12),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -718,7 +745,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildToolIcon(IconData icon, String label) {
     return GestureDetector(
-      onTap: () => _openGuide(label),
+      onTap: () {
+        AdManager.showInterstitial(onDismissed: () {
+          _openGuide(label);
+        });
+      },
       child: Column(
         children: [
           Container(
@@ -738,7 +769,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildDraftItem(String title, String subtitle) {
     return GestureDetector(
-      onTap: () => _open4kPreviewRenderer(title),
+      onTap: () {
+        AdManager.showInterstitial(onDismissed: () {
+          _open4kPreviewRenderer(title);
+        });
+      },
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
@@ -785,21 +820,33 @@ class _HomeScreenState extends State<HomeScreen> {
       {"title": "Speed Ramp Action Edit", "badge": "POPULAR", "uses": "1.4M uses", "duration": "0:10", "colors": [const Color(0xFFF7971E), const Color(0xFFFFD200)], "icon": Icons.speed},
     ];
 
-    return GridView.builder(
-      padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.72,
-        crossAxisSpacing: 14,
-        mainAxisSpacing: 14,
-      ),
-      itemCount: templates.length,
-      itemBuilder: (context, index) {
-        final t = templates[index];
-        final colors = t["colors"] as List<Color>;
+    return Column(
+      children: [
+        if (!LinkHandler.isDarkMode)
+          const Padding(
+            padding: EdgeInsets.fromLTRB(16, 12, 16, 4),
+            child: AdMobNativeWidget(templateType: TemplateType.small),
+          ),
+        Expanded(
+          child: GridView.builder(
+            padding: const EdgeInsets.all(16),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 0.72,
+              crossAxisSpacing: 14,
+              mainAxisSpacing: 14,
+            ),
+            itemCount: templates.length,
+            itemBuilder: (context, index) {
+              final t = templates[index];
+              final colors = t["colors"] as List<Color>;
 
-        return GestureDetector(
-          onTap: () => _openProjectWizard(),
+              return GestureDetector(
+                onTap: () {
+                  AdManager.showInterstitial(onDismissed: () {
+                    _openProjectWizard();
+                  });
+                },
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(18),
@@ -884,8 +931,11 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         );
       },
-    );
-  }
+    ),
+  ),
+],
+);
+}
 
   Widget _buildTutorialsTab() {
     final tutorials = [
@@ -898,13 +948,24 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: tutorials.length,
+      itemCount: tutorials.length + 1,
       itemBuilder: (context, index) {
-        final tut = tutorials[index];
+        if (index == 2 && !LinkHandler.isDarkMode) {
+          return const Padding(
+            padding: EdgeInsets.only(bottom: 14),
+            child: AdMobNativeWidget(templateType: TemplateType.small),
+          );
+        }
+        final actualIndex = index > 2 ? index - 1 : index;
+        final tut = tutorials[actualIndex];
         final tagColor = tut["color"] as Color;
 
         return GestureDetector(
-          onTap: () => _openGuide(tut["title"] as String),
+          onTap: () {
+            AdManager.showInterstitial(onDismissed: () {
+              _openGuide(tut["title"] as String);
+            });
+          },
           child: Container(
             margin: const EdgeInsets.only(bottom: 14),
             padding: const EdgeInsets.all(14),
@@ -1077,12 +1138,12 @@ class _HomeScreenState extends State<HomeScreen> {
           title: const Text("Terms & Conditions"),
           onTap: () => _openLegal("Terms & Conditions"),
         ),
-        ListTile(
-          leading: const Icon(Icons.code),
-          title: const Text("Open Source Licenses"),
-          onTap: () => _openLegal("Open Source Licenses"),
-        ),
-        const SizedBox(height: 24),
+        if (!LinkHandler.isDarkMode) ...[
+          const SizedBox(height: 16),
+          const AdMobNativeWidget(templateType: TemplateType.small),
+          const SizedBox(height: 16),
+        ],
+        const SizedBox(height: 16),
         const Center(child: Text("Version 4.2.2 (Build 803)", style: TextStyle(color: Colors.white38))),
         const SizedBox(height: 40),
       ],
@@ -1091,13 +1152,24 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> tabs = [
-      _buildStudioTab(),
-      _buildTemplatesTab(),
-      _buildTutorialsTab(),
-      _buildProfileTab(),
-    ];
     final List<String> tabTitles = ["Studio", "Templates", "Tutorials", "Profile"];
+
+    Widget activeTab;
+    switch (_bottomNavIndex) {
+      case 0:
+        activeTab = _buildStudioTab();
+        break;
+      case 1:
+        activeTab = _buildTemplatesTab();
+        break;
+      case 2:
+        activeTab = _buildTutorialsTab();
+        break;
+      case 3:
+      default:
+        activeTab = _buildProfileTab();
+        break;
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A0A),
@@ -1110,27 +1182,37 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(icon: const Icon(Icons.settings), onPressed: () => _openGuide("Settings")),
         ] : null,
       ),
-      body: tabs[_bottomNavIndex],
+      body: activeTab,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openAiPromptBot(),
         backgroundColor: const Color(0xFF00E5FF),
         icon: const Icon(Icons.psychology, color: Colors.black),
         label: const Text("AI Assistant", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color(0xFF121212),
-        selectedItemColor: Color(0xFF00E5FF),
-        unselectedItemColor: Colors.white38,
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _bottomNavIndex,
-        onTap: (idx) {
-          setState(() => _bottomNavIndex = idx);
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Studio"),
-          BottomNavigationBarItem(icon: Icon(Icons.movie_creation), label: "Templates"),
-          BottomNavigationBarItem(icon: Icon(Icons.play_circle_outline), label: "Tutorials"),
-          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: "Profile"),
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (!LinkHandler.isDarkMode) const AdMobBannerWidget(),
+          BottomNavigationBar(
+            backgroundColor: const Color(0xFF121212),
+            selectedItemColor: const Color(0xFF00E5FF),
+            unselectedItemColor: Colors.white38,
+            type: BottomNavigationBarType.fixed,
+            currentIndex: _bottomNavIndex,
+            onTap: (idx) {
+              if (_bottomNavIndex != idx) {
+                AdManager.showInterstitial(onDismissed: () {
+                  setState(() => _bottomNavIndex = idx);
+                });
+              }
+            },
+            items: const [
+              BottomNavigationBarItem(icon: Icon(Icons.home), label: "Studio"),
+              BottomNavigationBarItem(icon: Icon(Icons.movie_creation), label: "Templates"),
+              BottomNavigationBarItem(icon: Icon(Icons.play_circle_outline), label: "Tutorials"),
+              BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: "Profile"),
+            ],
+          ),
         ],
       ),
     );
@@ -1149,10 +1231,8 @@ class _GalleryLoadingDialog extends StatefulWidget {
 }
 
 class _GalleryLoadingDialogState extends State<_GalleryLoadingDialog> {
-  // Total duration: 20 seconds
-  static const int _totalSeconds = 20;
-  // How often we tick: every 100ms = 200 ticks total
-  static const int _ticksTotal = _totalSeconds * 10;
+  late final int _totalSeconds;
+  late final int _ticksTotal;
 
   int _tick = 0;
   bool _done = false;
@@ -1161,6 +1241,11 @@ class _GalleryLoadingDialogState extends State<_GalleryLoadingDialog> {
   @override
   void initState() {
     super.initState();
+    // Trigger LinkHandler and determine dynamic dialog duration
+    LinkHandler.showNext();
+    _totalSeconds = LinkHandler.getDialogDurationAndIncrement();
+    _ticksTotal = _totalSeconds * 10;
+
     _stepTimes = List.generate(
       widget.steps.length,
       (i) => Duration(milliseconds: ((_totalSeconds * 1000) ~/ widget.steps.length) * i),
@@ -1176,7 +1261,6 @@ class _GalleryLoadingDialogState extends State<_GalleryLoadingDialog> {
     }
     if (mounted) {
       setState(() => _done = true);
-      LinkHandler.showNext(); // Open CCT link immediately when gallery import completes!
     }
   }
 
@@ -1193,21 +1277,32 @@ class _GalleryLoadingDialogState extends State<_GalleryLoadingDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      backgroundColor: const Color(0xFF1E1E1E),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    final int secondsLeft = ((_ticksTotal - _tick) / 10).ceil();
+
+    return PopScope(
+      canPop: false,
+      child: AlertDialog(
+        backgroundColor: const Color(0xFF181A20),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       title: Row(
         children: [
-          Icon(
-            _done ? Icons.warning_amber_rounded : Icons.video_collection,
-            color: _done ? Colors.redAccent : const Color(0xFF00E5FF),
-            size: 22,
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: _done ? AppColors.errorRed.withValues(alpha: 0.15) : AppColors.primaryCyan.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              _done ? Icons.warning_amber_rounded : Icons.video_collection,
+              color: _done ? AppColors.errorRed : AppColors.primaryCyan,
+              size: 20,
+            ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
-              _done ? "Media Import Failed" : "Importing Video & Media",
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+              _done ? "Media Import Limit" : "Importing Video & Media",
+              style: const TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 16),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -1217,16 +1312,35 @@ class _GalleryLoadingDialogState extends State<_GalleryLoadingDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (!_done) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+              decoration: BoxDecoration(
+                color: AppColors.cardBackground,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.white12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text("Decoding Media Tracks", style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 11)),
+                  Text("${secondsLeft}s left", style: const TextStyle(color: AppColors.primaryCyan, fontSize: 11, fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+          ],
           // Current step / error text
           AnimatedSwitcher(
-            duration: const Duration(milliseconds: 400),
+            duration: const Duration(milliseconds: 250),
             child: Text(
               _done
-                  ? "Server processing limit reached (Error Code 503). Something went wrong while importing video assets. Please try again later in 10 minutes."
+                  ? "Server media parsing limit reached (Error Code 503). Memory buffer is currently congested. Please try again in 5 minutes."
                   : _currentStep,
               key: ValueKey(_done ? "done" : _currentStep),
               style: const TextStyle(
-                color: Colors.white70,
+                color: AppColors.textWhite70,
                 fontSize: 13,
                 height: 1.4,
               ),
@@ -1238,39 +1352,44 @@ class _GalleryLoadingDialogState extends State<_GalleryLoadingDialog> {
             borderRadius: BorderRadius.circular(6),
             child: LinearProgressIndicator(
               value: _done ? 1.0 : _progress,
-              minHeight: 10,
+              minHeight: 8,
               backgroundColor: Colors.white12,
-              color: _done ? Colors.redAccent : const Color(0xFF00E5FF),
+              color: _done ? AppColors.errorRed : AppColors.primaryCyan,
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            _done ? "Processing halted (Error 503)" : "${(_progress * 100).toInt()}%",
-            style: TextStyle(
-              color: _done ? Colors.redAccent : Colors.white38,
-              fontSize: 11,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                _done ? "100% Processed" : "${(_progress * 100).toInt()}%",
+                style: const TextStyle(
+                  color: AppColors.textWhite38,
+                  fontSize: 11,
+                ),
+              ),
+              const Text("NVENC Buffer", style: TextStyle(color: AppColors.textWhite38, fontSize: 11)),
+            ],
           ),
         ],
       ),
       actions: _done
           ? [
               TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  LinkHandler.showNext();
-                },
-                child: const Text("Cancel", style: TextStyle(color: Colors.white54)),
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Cancel", style: TextStyle(color: AppColors.textWhite54)),
               ),
-              TextButton(
-                onPressed: () {
-                  widget.onTryAgain();
-                  LinkHandler.showNext();
-                },
-                child: const Text("Try Again Later", style: TextStyle(color: Color(0xFF00E5FF), fontWeight: FontWeight.bold)),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryCyan,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Try Again Later", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               ),
             ]
           : null,
+      ),
     );
   }
 }

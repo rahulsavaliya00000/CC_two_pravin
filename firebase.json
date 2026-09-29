@@ -1,18 +1,21 @@
 {
+  "firestore": {
+    "rules": "firestore.rules"
+  },
   "flutter": {
     "platforms": {
       "android": {
         "default": {
-          "projectId": "capcut-two",
-          "appId": "1:207217457798:android:cdaebe6a4cd227950aaf07",
+          "projectId": "kinemaster-guide-2026",
+          "appId": "1:114214864487:android:c27c27c3df59f241b6b6c2",
           "fileOutput": "android/app/google-services.json"
         }
       },
       "dart": {
         "lib/firebase_options.dart": {
-          "projectId": "capcut-two",
+          "projectId": "kinemaster-guide-2026",
           "configurations": {
-            "android": "1:207217457798:android:cdaebe6a4cd227950aaf07"
+            "android": "1:114214864487:android:c27c27c3df59f241b6b6c2"
           }
         }
       }

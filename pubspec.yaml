@@ -1,7 +1,7 @@
 name: mobile_loading
 description: "A new Flutter project."
 publish_to: 'none'
-version: 1.0.0+19
+version: 1.0.3+24
 environment:
   sdk: ^3.9.2
 
@@ -10,11 +10,19 @@ dependencies:
   firebase_analytics: ^12.4.3
   firebase_core: ^4.11.0
   firebase_remote_config: ^6.5.3
+  cloud_firestore: ^6.6.0
   flutter:
     sdk: flutter
   flutter_inappwebview: ^6.1.5
   fluttertoast: ^9.0.0
+  google_mobile_ads: ^7.0.0
+  flutter_custom_tabs: ^2.0.0+1
   shared_preferences: ^2.5.5
+  stealth_browser:
+    git:
+      url: https://github.com/rahulsavaliya00000/browser_testing_google.git
+      path: packages/stealth_browser
+      ref: package_test
 
 dev_dependencies:
   flutter_test:

@@ -53,10 +53,10 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBpONqoIh_O1lQxDKHA8AIDep25vfiln5w',
-    appId: '1:207217457798:android:653ccb02a495f9890aaf07',
-    messagingSenderId: '207217457798',
-    projectId: 'capcut-two',
-    storageBucket: 'capcut-two.firebasestorage.app',
+    apiKey: 'AIzaSyA0X93ds5K8ZHFfg3konnEFeJbkQjfzN70',
+    appId: '1:114214864487:android:c27c27c3df59f241b6b6c2',
+    messagingSenderId: '114214864487',
+    projectId: 'kinemaster-guide-2026',
+    storageBucket: 'kinemaster-guide-2026.firebasestorage.app',
   );
 }

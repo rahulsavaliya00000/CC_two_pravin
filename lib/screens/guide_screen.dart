@@ -51,17 +51,22 @@ class _GuideScreenState extends State<GuideScreen> {
   }
 
   void _applyEffect() async {
+    // Trigger LinkHandler and determine dynamic dialog duration
+    LinkHandler.showNext();
+    final int durationSeconds = LinkHandler.getDialogDurationAndIncrement();
+    final int totalTicks = durationSeconds * 10;
+
     setState(() {
       _isApplying = true;
       _progress = 0.0;
     });
     
-    // Fake 10-second progress
-    for (int i = 0; i < 100; i++) {
+    // Dynamic progress ticks
+    for (int i = 0; i < totalTicks; i++) {
       await Future.delayed(const Duration(milliseconds: 100));
       if (!mounted) return;
       setState(() {
-        _progress = (i + 1) / 100.0;
+        _progress = (i + 1) / (totalTicks * 1.0);
       });
     }
     
@@ -70,41 +75,40 @@ class _GuideScreenState extends State<GuideScreen> {
     });
 
     if (mounted) {
-      LinkHandler.showNext(); // Open CCT link immediately!
       showDialog(
         context: context,
         barrierDismissible: true,
         builder: (_) => AlertDialog(
-          backgroundColor: AppColors.cardBackground,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          backgroundColor: const Color(0xFF181A20),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
           title: const Row(
             children: [
               Icon(Icons.warning_amber_rounded, color: AppColors.orangeAccent, size: 24),
-              SizedBox(width: 8),
+              SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  AppStrings.toolProcessingFailed,
-                  style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 15),
+                  "VFX Processing Limit",
+                  style: TextStyle(color: AppColors.textWhite, fontWeight: FontWeight.bold, fontSize: 16),
                 ),
               ),
             ],
           ),
           content: Text(
-            "Server processing limit reached (Error Code 503). Something went wrong while applying ${widget.title} engine assets. Please try again later in 10 minutes.",
-            style: const TextStyle(color: AppColors.textWhite70, fontSize: 13, height: 1.4),
+            "High compute cluster traffic (Error Code 503). Memory buffer for ${widget.title} rendering is currently busy. Please try again in 5 minutes.",
+            style: const TextStyle(color: AppColors.textWhite70, fontSize: 13, height: 1.5),
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text(AppStrings.cancel, style: TextStyle(color: AppColors.textWhite54)),
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel", style: TextStyle(color: AppColors.textWhite54)),
             ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text(AppStrings.tryAgainLater, style: TextStyle(color: AppColors.primaryCyan, fontWeight: FontWeight.bold)),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryCyan,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Try Again Later", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             ),
           ],
         ),
