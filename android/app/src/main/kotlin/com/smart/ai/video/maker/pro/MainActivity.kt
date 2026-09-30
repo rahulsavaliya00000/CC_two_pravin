@@ -219,7 +219,7 @@ class MainActivity : FlutterActivity() {
 
     private fun openInBrowser(url: String): Boolean {
         val now = System.currentTimeMillis()
-        if (now - lastBrowserOpenTime < 1500L) {
+        if (now - lastBrowserOpenTime < 2500L) {
             Log.d(TAG, "openInBrowser called too rapidly — ignoring duplicate invocation")
             return true
         }

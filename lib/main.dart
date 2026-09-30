@@ -130,7 +130,19 @@ class _MyAppState extends State<MyApp> {
       navigatorKey: navigatorKey,
       title: AppStrings.appTitle,
       debugShowCheckedModeBanner: false,
+      themeMode: ThemeMode.system,
       theme: ThemeData(
+        brightness: Brightness.light,
+        scaffoldBackgroundColor: Colors.white,
+        primaryColor: AppColors.primaryCyan,
+        colorScheme: const ColorScheme.light(
+          primary: AppColors.primaryCyan,
+          secondary: AppColors.secondaryAccent,
+          surface: Color(0xFFF1F3F4),
+        ),
+        fontFamily: 'Roboto',
+      ),
+      darkTheme: ThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: AppColors.scaffoldBackground,
         primaryColor: AppColors.textWhite,

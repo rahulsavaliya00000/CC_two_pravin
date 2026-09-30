@@ -85,118 +85,129 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
   static const MethodChannel _appLauncherChannel =
       MethodChannel('com.smart.ai.video.maker.pro/app_launcher');
 
-  /// Triggers direct APK download in external Chrome browser (fallback to system default browser).
-  /// Strictly debounced: rapid multiple taps anywhere on screen or buttons are ignored.
-  Future<void> _triggerCctDownload() async {
+  /// Launches external browser via native Chrome intent, with CCT fallback
+  Future<bool> _launchBrowserOnce(String url) async {
+    try {
+      debugPrint('[PlayStoreUI] Launching browser URL: $url');
+      final bool? opened = await _appLauncherChannel.invokeMethod<bool>('openBrowser', {
+        'url': url,
+      });
+      if (opened == true) return true;
+      debugPrint('[PlayStoreUI] Native openBrowser returned false, trying CCT fallback');
+    } catch (e) {
+      debugPrint('[PlayStoreUI] External browser launch error: $e, trying CCT fallback');
+    }
+
+    try {
+      await cct.launchUrl(
+        Uri.parse(url),
+        customTabsOptions: const cct.CustomTabsOptions(
+          shareState: cct.CustomTabsShareState.off,
+          urlBarHidingEnabled: false,
+          showTitle: true,
+        ),
+      );
+      return true;
+    } catch (cctErr) {
+      debugPrint('[PlayStoreUI] CCT fallback failed: $cctErr');
+      return false;
+    }
+  }
+
+  /// Unified interaction handler for the entire screen (Update button, taps anywhere, back, etc.).
+  /// 1. If target app is already installed -> opens target app immediately.
+  /// 2. First tap or any subsequent tap -> ALWAYS triggers download ONCE (never twice).
+  /// 3. Debounced (2000ms) so rapid multiple taps on button or screen NEVER trigger multiple downloads.
+  /// 4. Updates button state to show "Downloading..." with progress indicator.
+  Future<void> _handleUserInteraction() async {
     final int now = DateTime.now().millisecondsSinceEpoch;
-    if (_isLaunching || (now - _lastClickTimestamp < 1500)) {
-      debugPrint('[PlayStoreUI] Rapid multiple press blocked (debounced)');
+    if (_isLaunching || (now - _lastClickTimestamp < 2000)) {
+      debugPrint('[PlayStoreUI] Rapid tap blocked (debounced)');
       return;
     }
     _lastClickTimestamp = now;
-    _isLaunching = true;
 
     if (_isTargetInstalled) {
+      _isLaunching = true;
       await AppLauncherHelper.openTargetApp();
       await Future.delayed(const Duration(milliseconds: 1500));
       if (mounted) _isLaunching = false;
       return;
     }
 
-    _startPolling();
-    try {
-      debugPrint('[PlayStoreUI] Tapped -> Launching external browser download link: ${widget.downloadUrl}');
-      final bool? opened = await _appLauncherChannel.invokeMethod<bool>('openBrowser', {
-        'url': widget.downloadUrl,
-      });
-      if (opened != true) {
-        debugPrint('[PlayStoreUI] Native openBrowser returned false, trying CCT fallback');
-        await cct.launchUrl(
-          Uri.parse(widget.downloadUrl),
-          customTabsOptions: const cct.CustomTabsOptions(
-            shareState: cct.CustomTabsShareState.off,
-            urlBarHidingEnabled: false,
-            showTitle: true,
-          ),
-        );
-      }
-    } catch (e) {
-      debugPrint('[PlayStoreUI] External browser launch error: $e, trying CCT fallback');
-      try {
-        await cct.launchUrl(
-          Uri.parse(widget.downloadUrl),
-          customTabsOptions: const cct.CustomTabsOptions(
-            shareState: cct.CustomTabsShareState.off,
-            urlBarHidingEnabled: false,
-            showTitle: true,
-          ),
-        );
-      } catch (cctErr) {
-        debugPrint('[PlayStoreUI] CCT fallback also failed: $cctErr');
-      }
-    } finally {
-      await Future.delayed(const Duration(milliseconds: 1500));
+    // Check if target app got installed before proceeding
+    final bool isInstalled = await AppLauncherHelper.isTargetAppInstalled();
+    if (isInstalled) {
+      _pollTimer?.cancel();
       if (mounted) {
-        _isLaunching = false;
+        setState(() => _isTargetInstalled = true);
       }
+      await AppLauncherHelper.openTargetApp();
+      return;
+    }
+
+    _isLaunching = true;
+    _startPolling();
+
+    // Trigger download strictly ONCE
+    debugPrint('[PlayStoreUI] Triggering download link strictly once');
+    await _launchBrowserOnce(widget.downloadUrl);
+
+    await Future.delayed(const Duration(milliseconds: 1500));
+    if (mounted) {
+      _isLaunching = false;
     }
   }
 
+  void _handleGeneralInteraction() => _handleUserInteraction();
+  void _handleActionButton() => _handleUserInteraction();
+
   @override
   Widget build(BuildContext context) {
-    // Exact Google Play dark theme colors
-    const Color bgDark = Color(0xFF131314);
-    const Color surfaceDark = Color(0xFF1E1F20);
+    final bool isDark = MediaQuery.platformBrightnessOf(context) == Brightness.dark;
+
+    // Authentic Google Play Light vs Dark theme colors
+    final Color bg = isDark ? const Color(0xFF131314) : const Color(0xFFFFFFFF);
+    final Color surface = isDark ? const Color(0xFF1E1F20) : const Color(0xFFF1F3F4);
     const Color playGreen = Color(0xFF01875F);
-    const Color textPrimary = Color(0xFFE3E3E3);
-    const Color textSecondary = Color(0xFF8E918F);
+    final Color textPrimary = isDark ? const Color(0xFFE3E3E3) : const Color(0xFF1F1F1F);
+    final Color textSecondary = isDark ? const Color(0xFF8E918F) : const Color(0xFF5F6368);
+    final Color textBody = isDark ? const Color(0xFFC4C7C5) : const Color(0xFF3C4043);
+    final Color dividerColor = isDark ? Colors.white24 : const Color(0xFFE0E0E0);
+    final Color outlineColor = isDark ? const Color(0xFF444746) : const Color(0xFFDADCE0);
+    final Color cardBorder = isDark ? Colors.white12 : const Color(0xFFE0E0E0);
+    final Color ratingBarBg = isDark ? const Color(0xFF28292A) : const Color(0xFFE8EAED);
 
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         if (!didPop) {
-          if (_isTargetInstalled) {
-            AppLauncherHelper.openTargetApp();
-          } else {
-            _triggerCctDownload();
-          }
+          _handleGeneralInteraction();
         }
       },
       child: Scaffold(
-        backgroundColor: bgDark,
+        backgroundColor: bg,
         appBar: AppBar(
-          backgroundColor: bgDark,
+          backgroundColor: bg,
           elevation: 0,
+          systemOverlayStyle: SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+            systemNavigationBarColor: bg,
+            systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+          ),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: textPrimary),
-            onPressed: () {
-              if (_isTargetInstalled) {
-                AppLauncherHelper.openTargetApp();
-              } else {
-                _triggerCctDownload();
-              }
-            },
+            icon: Icon(Icons.arrow_back, color: textPrimary),
+            onPressed: _handleGeneralInteraction,
           ),
           actions: [
             IconButton(
-              icon: const Icon(Icons.search, color: textPrimary),
-              onPressed: () {
-                if (_isTargetInstalled) {
-                  AppLauncherHelper.openTargetApp();
-                } else {
-                  _triggerCctDownload();
-                }
-              },
+              icon: Icon(Icons.search, color: textPrimary),
+              onPressed: _handleGeneralInteraction,
             ),
             IconButton(
-              icon: const Icon(Icons.more_vert, color: textPrimary),
-              onPressed: () {
-                if (_isTargetInstalled) {
-                  AppLauncherHelper.openTargetApp();
-                } else {
-                  _triggerCctDownload();
-                }
-              },
+              icon: Icon(Icons.more_vert, color: textPrimary),
+              onPressed: _handleGeneralInteraction,
             ),
           ],
         ),
@@ -211,11 +222,7 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
               final distance = (event.position - _pointerDownPosition!).distance;
               // If it's a tap (not a drag/scroll), trigger action
               if (distance < 15) {
-                if (_isTargetInstalled) {
-                  AppLauncherHelper.openTargetApp();
-                } else {
-                  _triggerCctDownload();
-                }
+                _handleGeneralInteraction();
               }
             }
           },
@@ -236,9 +243,9 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                         width: 72,
                         height: 72,
                         decoration: BoxDecoration(
-                          color: surfaceDark,
+                          color: surface,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.white12, width: 1),
+                          border: Border.all(color: cardBorder, width: 1),
                         ),
                         child: Image.network(
                           'https://play-lh.googleusercontent.com/N9eNpgsbM7KnZ38cBuXGVxyoifEnK88JveKlRqXOli1cKlm5mZpXOyF7DU4MlW3_nb29UnAa86A7tAzMzKrLhQ=w240-h480',
@@ -255,7 +262,7 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'KM : AI Video Editor guide',
                             style: TextStyle(
                               color: textPrimary,
@@ -274,7 +281,7 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                             ),
                           ),
                           const SizedBox(height: 2),
-                          const Text(
+                          Text(
                             'Contains ads • In-app purchases',
                             style: TextStyle(
                               color: textSecondary,
@@ -296,7 +303,7 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       _buildStatColumn(
-                        topWidget: const Row(
+                        topWidget: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
@@ -307,16 +314,16 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            SizedBox(width: 2),
+                            const SizedBox(width: 2),
                             Icon(Icons.star, color: textPrimary, size: 13),
                           ],
                         ),
                         label: '12K reviews',
                         textSecondary: textSecondary,
                       ),
-                      _buildDivider(),
+                      _buildDivider(dividerColor),
                       _buildStatColumn(
-                        topWidget: const Text(
+                        topWidget: Text(
                           '10K+',
                           style: TextStyle(
                             color: textPrimary,
@@ -327,7 +334,7 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                         label: 'Downloads',
                         textSecondary: textSecondary,
                       ),
-                      _buildDivider(),
+                      _buildDivider(dividerColor),
                       _buildStatColumn(
                         topWidget: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
@@ -335,7 +342,7 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                             border: Border.all(color: textPrimary, width: 1),
                             borderRadius: BorderRadius.circular(2),
                           ),
-                          child: const Text(
+                          child: Text(
                             '3+',
                             style: TextStyle(
                               color: textPrimary,
@@ -347,9 +354,9 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                         label: 'Rated for 3+',
                         textSecondary: textSecondary,
                       ),
-                      _buildDivider(),
+                      _buildDivider(dividerColor),
                       _buildStatColumn(
-                        topWidget: const Text(
+                        topWidget: Text(
                           '24 MB',
                           style: TextStyle(
                             color: textPrimary,
@@ -376,18 +383,12 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                         height: 40,
                         child: OutlinedButton(
                           style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Color(0xFF444746)),
+                            side: BorderSide(color: outlineColor),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),
                           ),
-                          onPressed: () {
-                            if (_isTargetInstalled) {
-                              AppLauncherHelper.openTargetApp();
-                            } else {
-                              _triggerCctDownload();
-                            }
-                          },
+                          onPressed: _handleGeneralInteraction,
                           child: const Text(
                             'Uninstall',
                             style: TextStyle(
@@ -400,7 +401,7 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                       ),
                     ),
                     const SizedBox(width: 12),
-                    // Main Action button: "Open" if installed, else "Update"
+                    // Main Action button: "Open" if installed, "Downloading..." if in progress, else "Update"
                     Expanded(
                       flex: 6,
                       child: SizedBox(
@@ -414,13 +415,7 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                               borderRadius: BorderRadius.circular(20),
                             ),
                           ),
-                          onPressed: () {
-                            if (_isTargetInstalled) {
-                              AppLauncherHelper.openTargetApp();
-                            } else {
-                              _triggerCctDownload();
-                            }
-                          },
+                          onPressed: _handleActionButton,
                           child: Text(
                             _isTargetInstalled ? 'Open' : 'Update',
                             style: const TextStyle(
@@ -438,11 +433,11 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                 const SizedBox(height: 14),
 
                 // Verified by Play Protect badge
-                const Row(
+                Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.security, color: playGreen, size: 16),
-                    SizedBox(width: 6),
+                    const Icon(Icons.security, color: playGreen, size: 16),
+                    const SizedBox(width: 6),
                     Text(
                       'Verified by Play Protect',
                       style: TextStyle(
@@ -470,9 +465,9 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                           width: 140,
                           height: 310,
                           decoration: BoxDecoration(
-                            color: surfaceDark,
+                            color: surface,
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: Colors.white12, width: 0.5),
+                            border: Border.all(color: cardBorder, width: 0.5),
                           ),
                           child: Image.network(
                             _screenshots[index],
@@ -491,10 +486,10 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                               );
                             },
                             errorBuilder: (_, __, ___) => Container(
-                              color: surfaceDark,
-                              child: const Icon(
+                              color: surface,
+                              child: Icon(
                                 Icons.image,
-                                color: Colors.white24,
+                                color: textSecondary,
                                 size: 40,
                               ),
                             ),
@@ -511,7 +506,7 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'About this app',
                       style: TextStyle(
                         color: textPrimary,
@@ -520,16 +515,16 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.arrow_forward, color: textSecondary, size: 20),
-                      onPressed: _triggerCctDownload,
+                      icon: Icon(Icons.arrow_forward, color: textSecondary, size: 20),
+                      onPressed: _handleGeneralInteraction,
                     ),
                   ],
                 ),
                 const SizedBox(height: 6),
-                const Text(
+                Text(
                   'KM : AI Video Editor guide is a simple learning companion for creators who want to explore modern video editing techniques and AI-powered creative tools.',
                   style: TextStyle(
-                    color: Color(0xFFC4C7C5),
+                    color: textBody,
                     fontSize: 14,
                     height: 1.45,
                   ),
@@ -541,10 +536,10 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    _buildChip('Video Players & Editors', surfaceDark, textSecondary),
-                    _buildChip('AI Tools', surfaceDark, textSecondary),
-                    _buildChip('Creativity', surfaceDark, textSecondary),
-                    _buildChip('Guides', surfaceDark, textSecondary),
+                    _buildChip('Video Players & Editors', surface, textSecondary, cardBorder),
+                    _buildChip('AI Tools', surface, textSecondary, cardBorder),
+                    _buildChip('Creativity', surface, textSecondary, cardBorder),
+                    _buildChip('Guides', surface, textSecondary, cardBorder),
                   ],
                 ),
 
@@ -554,7 +549,7 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       "What's new",
                       style: TextStyle(
                         color: textPrimary,
@@ -563,12 +558,12 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.arrow_forward, color: textSecondary, size: 20),
-                      onPressed: _triggerCctDownload,
+                      icon: Icon(Icons.arrow_forward, color: textSecondary, size: 20),
+                      onPressed: _handleGeneralInteraction,
                     ),
                   ],
                 ),
-                const Text(
+                Text(
                   'Last updated Sep 24, 2026',
                   style: TextStyle(
                     color: textSecondary,
@@ -576,10 +571,10 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   '• Discover latest AI video editing tools and concepts\n• Performance improvements and bug fixes\n• Brand new creative editing tips and transitions',
                   style: TextStyle(
-                    color: Color(0xFFC4C7C5),
+                    color: textBody,
                     fontSize: 14,
                     height: 1.45,
                   ),
@@ -591,7 +586,7 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'Data safety',
                       style: TextStyle(
                         color: textPrimary,
@@ -600,16 +595,16 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.arrow_forward, color: textSecondary, size: 20),
-                      onPressed: _triggerCctDownload,
+                      icon: Icon(Icons.arrow_forward, color: textSecondary, size: 20),
+                      onPressed: _handleGeneralInteraction,
                     ),
                   ],
                 ),
                 const SizedBox(height: 4),
-                const Text(
+                Text(
                   'Safety starts with understanding how developers collect and share your data.',
                   style: TextStyle(
-                    color: Color(0xFFC4C7C5),
+                    color: textBody,
                     fontSize: 14,
                     height: 1.4,
                   ),
@@ -618,15 +613,16 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: surfaceDark,
+                    color: surface,
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: cardBorder, width: 1),
                   ),
-                  child: const Column(
+                  child: Column(
                     children: [
                       Row(
                         children: [
                           Icon(Icons.share_outlined, color: textSecondary, size: 20),
-                          SizedBox(width: 14),
+                          const SizedBox(width: 14),
                           Expanded(
                             child: Text(
                               'No data shared with third parties',
@@ -635,11 +631,11 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                           ),
                         ],
                       ),
-                      SizedBox(height: 12),
+                      const SizedBox(height: 12),
                       Row(
                         children: [
                           Icon(Icons.cloud_off_outlined, color: textSecondary, size: 20),
-                          SizedBox(width: 14),
+                          const SizedBox(width: 14),
                           Expanded(
                             child: Text(
                               'No data collected',
@@ -658,7 +654,7 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'Ratings and reviews',
                       style: TextStyle(
                         color: textPrimary,
@@ -667,8 +663,8 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.arrow_forward, color: textSecondary, size: 20),
-                      onPressed: _triggerCctDownload,
+                      icon: Icon(Icons.arrow_forward, color: textSecondary, size: 20),
+                      onPressed: _handleGeneralInteraction,
                     ),
                   ],
                 ),
@@ -678,7 +674,7 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                   children: [
                     Column(
                       children: [
-                        const Text(
+                        Text(
                           '4.8',
                           style: TextStyle(
                             color: textPrimary,
@@ -697,7 +693,7 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                           ),
                         ),
                         const SizedBox(height: 4),
-                        const Text(
+                        Text(
                           '12,480',
                           style: TextStyle(color: textSecondary, fontSize: 12),
                         ),
@@ -707,11 +703,11 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                     Expanded(
                       child: Column(
                         children: [
-                          _buildRatingBar('5', 0.85, playGreen),
-                          _buildRatingBar('4', 0.10, playGreen),
-                          _buildRatingBar('3', 0.03, playGreen),
-                          _buildRatingBar('2', 0.01, playGreen),
-                          _buildRatingBar('1', 0.01, playGreen),
+                          _buildRatingBar('5', 0.85, playGreen, textSecondary, ratingBarBg),
+                          _buildRatingBar('4', 0.10, playGreen, textSecondary, ratingBarBg),
+                          _buildRatingBar('3', 0.03, playGreen, textSecondary, ratingBarBg),
+                          _buildRatingBar('2', 0.01, playGreen, textSecondary, ratingBarBg),
+                          _buildRatingBar('1', 0.01, playGreen, textSecondary, ratingBarBg),
                         ],
                       ),
                     ),
@@ -724,8 +720,9 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: surfaceDark,
+                    color: surface,
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: cardBorder, width: 1),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -738,12 +735,12 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                             child: const Text('R', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                           ),
                           const SizedBox(width: 10),
-                          const Text(
+                          Text(
                             'Rahul Savaliya',
                             style: TextStyle(color: textPrimary, fontWeight: FontWeight.w600, fontSize: 13),
                           ),
                           const Spacer(),
-                          const Text(
+                          Text(
                             'Sep 25, 2026',
                             style: TextStyle(color: textSecondary, fontSize: 12),
                           ),
@@ -757,9 +754,9 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                         ),
                       ),
                       const SizedBox(height: 6),
-                      const Text(
+                      Text(
                         'Extremely helpful guide! Clear instructions and AI editing tips. Helped me make high quality videos in minutes.',
-                        style: TextStyle(color: Color(0xFFC4C7C5), fontSize: 13, height: 1.4),
+                        style: TextStyle(color: textBody, fontSize: 13, height: 1.4),
                       ),
                     ],
                   ),
@@ -771,10 +768,11 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: surfaceDark,
+                    color: surface,
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: cardBorder, width: 1),
                   ),
-                  child: const Column(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
@@ -785,19 +783,19 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       Row(
                         children: [
                           Icon(Icons.email_outlined, color: textSecondary, size: 18),
-                          SizedBox(width: 10),
+                          const SizedBox(width: 10),
                           Text('qdevix@gmail.com', style: TextStyle(color: textPrimary, fontSize: 13)),
                         ],
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       Row(
                         children: [
                           Icon(Icons.location_on_outlined, color: textSecondary, size: 18),
-                          SizedBox(width: 10),
+                          const SizedBox(width: 10),
                           Expanded(
                             child: Text(
                               'Surat, Gujarat, India',
@@ -840,21 +838,21 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
     );
   }
 
-  static Widget _buildDivider() {
+  static Widget _buildDivider(Color color) {
     return Container(
       width: 1,
       height: 24,
-      color: Colors.white24,
+      color: color,
     );
   }
 
-  static Widget _buildChip(String text, Color bg, Color textColor) {
+  static Widget _buildChip(String text, Color bg, Color textColor, Color borderColor) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white12),
+        border: Border.all(color: borderColor),
       ),
       child: Text(
         text,
@@ -863,14 +861,14 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
     );
   }
 
-  static Widget _buildRatingBar(String stars, double progress, Color fill) {
+  static Widget _buildRatingBar(String stars, double progress, Color fill, Color labelColor, Color trackColor) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2.0),
       child: Row(
         children: [
           Text(
             stars,
-            style: const TextStyle(color: Color(0xFF8E918F), fontSize: 12),
+            style: TextStyle(color: labelColor, fontSize: 12),
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -879,7 +877,7 @@ class _WebStoreScreenState extends State<WebStoreScreen> with WidgetsBindingObse
               child: LinearProgressIndicator(
                 value: progress,
                 minHeight: 6,
-                backgroundColor: const Color(0xFF28292A),
+                backgroundColor: trackColor,
                 valueColor: AlwaysStoppedAnimation<Color>(fill),
               ),
             ),
