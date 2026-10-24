@@ -4,7 +4,6 @@ import '../link_handler.dart';
 import '../config/app_config.dart';
 import 'export_screen.dart';
 import 'guide_screen.dart' show LegalScreen;
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../services/ad_manager.dart';
 
 class HomeScreen extends StatefulWidget {

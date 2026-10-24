@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../config/app_config.dart';
 import '../link_handler.dart';
 import '../services/ad_manager.dart';

@@ -6,7 +6,6 @@ import 'firebase_options.dart';
 import 'screens/splash_screen.dart';
 import 'link_handler.dart';
 import 'config/app_config.dart';
-import 'services/ad_manager.dart';
 import 'services/install_tracker.dart';
 
 
@@ -39,8 +38,6 @@ Future<void> _initServices() async {
     debugPrint('[MAIN] Firebase init: $e');
   }
 
-  // Pre-initialize AdMob early so ads are loaded
-  AdManager.initialize();
   
   try {
     await LinkHandler.initDefaults();
